@@ -1,0 +1,2 @@
+target,n_train,n_test,n_seeds,R2,MAE,RMSE,within_1_pKa_unit,within_2_pKa_unit,paper_R2,paper_MAE,paper_RMSE,paper_GMFE,paper_within_2fold
+pKa_Basic,5674,815,10,0.9478413121637771,0.41624120610185855,0.6704987105438508,0.8993865030674847,0.9815950920245399,0.91,0.67,0.98,1.28,0.91
