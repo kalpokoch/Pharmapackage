@@ -9,26 +9,22 @@ comparison — pKa_Acidic/pKa_Basic). Each notebook fits on the **official train
 and predicts on the **official held-out test split only** — never an internal CV estimate —
 using a multi-seed ensemble, matching the actual final-confirmation scripts this project used.
 
-## Results (already baked into each notebook — this is what was actually run)
+## Results (10-seed retrained, official test split)
 
-| Notebook | Target | Architecture | Our result | Paper | Verdict |
+All five proposed models were retrained with 10 seeds (42-51) and scored on the official held-out test split
+(ensemble of the 10 seeds). Full tables, per-seed metrics, figures, untuned baselines and the CL/VDss ablation are in
+[`results_10seed/`](results_10seed/README.md).
+
+| Target | Architecture | n_test | Our result | Paper | Verdict |
 |---|---|---|---|---|---|
-| 01 | pKa_Acidic | GraphMPNN (10-seed) | R²=0.969 MAE=0.424 | R²=0.94 MAE=0.61 | beats paper |
-| 02 | pKa_Basic | GraphMPNN (10-seed) | R²=0.948 MAE=0.416 | R²=0.91 MAE=0.67 | beats paper |
-| 03 | CL | MFMN_DynGate (5-seed) | GMFE=2.017 w2f=0.621 | GMFE=2.00 w2f=0.64 | narrow trail on GMFE/w2f |
-| 04 | VDss | MFMN_InteractAux (5-seed) | GMFE=1.774 w2f=0.672 | GMFE=1.88 w2f=0.62 | clean sweep, beats paper |
-| 05 | Fu | MFMN_DynGate + 1.25× low-fu weighting (10-seed) | R²=0.712 MAE=0.319 GMFE=2.086 w2f=0.613 | R²=0.69 MAE=0.30 GMFE=2.01 w2f=0.60 | beats paper on R²/w2f, improves on every metric vs. the original unweighted recipe |
+| pKa_Acidic | GraphMPNN | 776 | R²=0.969 MAE=0.424 | R²=0.94 MAE=0.61 | beats paper |
+| pKa_Basic | GraphMPNN | 815 | R²=0.948 MAE=0.416 | R²=0.91 MAE=0.67 | beats paper |
+| CL | MFMN_DynGate | 177 | GMFE=2.018 w2f=0.605 | GMFE=2.00 w2f=0.64 | narrowly trails paper |
+| VDss | MFMN_InteractAux | 177 | GMFE=1.764 w2f=0.684 | GMFE=1.88 w2f=0.62 | beats paper |
+| Fu | MFMN_DynGate + 1.25x low-fu weighting | 633 | R²=0.712 MAE=0.319 GMFE=2.086 w2f=0.613 | R²=0.69 MAE=0.30 GMFE=2.01 w2f=0.60 | beats paper on R²/w2f |
 
-("w2f" = within-2-fold, the standard PK-QSAR fold-accuracy metric.) These numbers match this
-project's own historical best-vs-paper confirmations almost exactly — this is a faithful
-reproduction, not a fresh/different result.
-
-## Update: 10-seed retrained results
-
-All five proposed models were retrained with 10 seeds and re-evaluated on the official test splits, together with untuned
-baselines and a 10-seed ablation for CL/VDss. See [`results_10seed/`](results_10seed/README.md) for the numbers, tables and
-figures. The table above (and the executed notebooks) are unchanged and remain the original 5/10-seed notebook runs. The Fu and
-pKa ablations are not yet included (Fu variants blocked; pKa runs in progress).
+("w2f" = within-2-fold.) The Fu and pKa ablations are not yet included (Fu variants blocked; pKa runs in progress).
+Note: the notebooks in `notebooks/` still contain their earlier saved outputs (5-seed for CL/VDss); the numbers above supersede them.
 
 ## Quick start
 

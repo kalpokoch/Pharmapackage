@@ -1,2 +1,0 @@
-target,n_train,n_test,n_seeds,R2,MAE,RMSE,within_1_pKa_unit,within_2_pKa_unit,paper_R2,paper_MAE,paper_RMSE,paper_GMFE,paper_within_2fold
-pKa_Acidic,5296,776,10,0.9688766124272525,0.4240870885693657,0.7571448603514502,0.9097938144329897,0.9742268041237113,0.94,0.61,1.05,1.1,0.98
