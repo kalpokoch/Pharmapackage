@@ -1,0 +1,580 @@
+{
+  "generated": "2026-10-01T06:51:46",
+  "note": "Training code is exec'd verbatim from the listed notebook cells / scripts; only the seed varies.",
+  "environment": {
+    "python": "3.12.3",
+    "torch": "2.11.0a0+eb65b36914.nv26.02",
+    "cuda": "13.1",
+    "numpy": "2.1.0",
+    "pandas": "3.0.1",
+    "scipy": "1.17.0",
+    "sklearn": "1.8.0",
+    "device": "NVIDIA A100-SXM4-40GB MIG 3g.20gb / NVIDIA A100-SXM4-40GB MIG 3g.20gb",
+    "platform": "Linux-6.8.0-87-generic-x86_64-with-glibc2.39"
+  },
+  "determinism": {
+    "thread_env": "2",
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "use_deterministic_algorithms": "True (warn_only=True)",
+    "seeding": "random.seed/np.random.seed/torch.manual_seed/cuda.manual_seed_all inside every task, plus the recipe's own RandomState(seed) validation split and torch.manual_seed(seed)",
+    "data_staging": "mfmn_benchmark_package/src + data copied byte-identically to /dev/shm/pk_ro (hash/size verified)"
+  },
+  "sha256": {
+    "seed_analysis_results/10seed_training_and_analysis.ipynb": "d64a8f6f4ba2fccd6f70ee41f6c551c22008d5ea883413782a8bee46eab4a48f",
+    "ablation/ablation_official_test_CL_VDss_Fu.ipynb": "1a6615e7478b93f363c016ff7d3c74885d0fbf577e5883dc2fd3b7098e6fc48b",
+    "mfmn_benchmark_package/notebooks/05_Fu_MFMN_DynGate.ipynb": "9d836aff6f5bdd8fad8bdef43fca79d761fabab99bf5d496a92c55fc34bd0112",
+    "MFMN_v2.ipynb": "f3fc47827b9291231ba0e888ca38b3b7585f09e312f3626646d514262d6b89ef",
+    "mfmn/experiments/expv2_aux_targets_final.py": "d9b79116ee3727c1eb393cf7ad040131843c5c5883603aeefff886d672038cb1",
+    "mfmn/experiments/expv2_aux_h7_dyngate.py": "f80692e3ff7c917e09ef50139d6ccf608ee76fd579b62fec2f8072c8942b14e4",
+    "ablation/proposed_model_ablation.csv": "b805cf6a44e6149312f1e10b042cfc0e3f104a8295c02d9b13b869cfebb22c4f",
+    "ablation_10seed/run_ablation_10seed.py": "3f987355df6510a3d79222ad57a0cfb8fc8ef54b0a9cecba5e94e76abf45a125",
+    "mfmn_benchmark_package/src/acidic_site.py": "4513256a7a32964942e4e29fd718bf5562e5ea0990b3753281750399bd3c20ee",
+    "mfmn_benchmark_package/src/aux_descriptor_features.py": "38ea0ddf0b136ae4285cdb209c2ab8a797d8c5abacbfd039d145805cac4d0fec",
+    "mfmn_benchmark_package/src/basic_site.py": "c8fded01d8a47a0e4016e1ec09526811e79d423f31309eaee0f043af391219dc",
+    "mfmn_benchmark_package/src/data_loader.py": "b8985d4cc22739659ffd697c8755d1bb748a9ddb535c7158bb8bf94c323be38d",
+    "mfmn_benchmark_package/src/descriptor_features.py": "0f9c8a91cd6d6064dc6d5dcfd3fb6e79a1ceccb981d23d5f9a1037a48ac75b10",
+    "mfmn_benchmark_package/src/graph_features.py": "32f479eebc25a1b7e7dda2deadbb8d1035dd38044d3572664dfec2ff561ab9b0",
+    "mfmn_benchmark_package/src/graph_mpnn.py": "55787ff15ab09f55eb430f2a5d7099b6c257b1529c1a17e0a16cda3f352809fb",
+    "mfmn_benchmark_package/src/metrics.py": "cf57c4a91febd6ad11313a14352c4aefd9a55bf9a34cf21d10d082372a8a4344",
+    "mfmn_benchmark_package/src/mfmn.py": "8b07f0ff7e123392da4132dc4d81054c9be02ec754c5bb434d2391da438e17e5",
+    "mfmn/features/aux_descriptor_features.py": "eb22d4cda63b2579ca8a53b73dc6f4d9e4cd211afdc10d196e5eaa7eb048c2a3",
+    "mfmn/features/descriptor_features.py": "faf3b70b2c07ffc0a89bb08761af43808f62d85a8db78c580ca5c5f00ab64ade",
+    "mfmn/models/mfmn.py": "5466bd4dae73c46278806f9905b37d9cf95a406defbf9d05be4325e0243f5399"
+  },
+  "sources": {
+    "clvd": {
+      "file": "ablation/ablation_official_test_CL_VDss_Fu.ipynb",
+      "cells": "cell 1 (imports/constants), cell 3 (fit_predict), cell 5 (VARIANTS list + loop logic reproduced line for line)",
+      "code": "src/mfmn.py"
+    },
+    "fuA": {
+      "file": "MFMN_v2.ipynb cell 1 + cell 13 (data prep) and mfmn/experiments/expv2_aux_h7_dyngate.py::fit_predict_dyngate with RECIPE['Fu'] (no sample weights)",
+      "cells": "MFMN_v2.ipynb cells 1, 13, 14"
+    },
+    "fuB": {
+      "file": "mfmn_benchmark_package/notebooks/05_Fu_MFMN_DynGate.ipynb",
+      "cells": "cells 1,2,3,4; ONLY change: LOWFU_WEIGHT_FN = make_binary_weight(1.0) (existing multiplier set to 1.0)"
+    },
+    "fuC1": {
+      "file": "mfmn/experiments/expv2_aux_targets_final.py",
+      "cells": "fit_predict(...) defaults (aux_weight=0.3, ctx pca32, MFMN_InteractAux) + data prep lines of its __main__ block"
+    },
+    "fuC2": {
+      "file": "mfmn/experiments/expv2_aux_h7_dyngate.py::fit_predict_dyngate (RECONSTRUCTED)",
+      "cells": "source taken programmatically with 2 textual substitutions (MFMN_DynGate->MFMN, interact_rank kwarg dropped); called with ctx_variant='pca32' + function defaults"
+    },
+    "fuC3": {
+      "file": "mfmn/experiments/expv2_aux_h7_dyngate.py::fit_predict_dyngate (RECONSTRUCTED)",
+      "cells": "same substituted source, called with RECIPE['Fu']"
+    },
+    "pka_*": {
+      "file": "seed_analysis_results/10seed_training_and_analysis.ipynb",
+      "cells": "cell 1 (imports), cell 9 (fit_predict_gnn, verbatim) + data prep lines of cell 10; RECONSTRUCTED modification applied in-process (no file edited): no_edge_gating / no_site_readout derive from the original graph_mpnn.py source by textual substitution; no_xtb drops feature columns in to_device_batch"
+    }
+  },
+  "slug_to_name": {
+    "CL/mfmn_base": "MFMN (base)",
+    "CL/interactaux": "MFMN_InteractAux",
+    "VDss/mfmn_base": "MFMN (base)",
+    "VDss/dyngate": "MFMN_DynGate",
+    "Fu/dyngate_unweighted": "MFMN_DynGate (unweighted)",
+    "Fu/mfmn_base_untuned": "MFMN base (untuned)",
+    "pKa_Acidic/no_xtb": "GraphMPNN, no xTB features",
+    "pKa_Acidic/no_edge_gating": "GraphMPNN, no edge gating",
+    "pKa_Acidic/no_site_readout": "GraphMPNN, no site readout",
+    "pKa_Basic/no_xtb": "GraphMPNN, no xTB features",
+    "pKa_Basic/no_edge_gating": "GraphMPNN, no edge gating",
+    "pKa_Basic/no_site_readout": "GraphMPNN, no site readout"
+  },
+  "final_check": {
+    "CL": {
+      "n_seeds": 10,
+      "n_test": 177,
+      "checked": "matches existing CSVs to 1e-6"
+    },
+    "VDss": {
+      "n_seeds": 10,
+      "n_test": 177,
+      "checked": "matches existing CSVs to 1e-6"
+    },
+    "Fu": {
+      "n_seeds": 10,
+      "n_test": 633,
+      "checked": "matches existing CSVs to 1e-6"
+    },
+    "pKa_Acidic": {
+      "n_seeds": 10,
+      "n_test": 776,
+      "checked": "matches existing CSVs to 1e-6"
+    },
+    "pKa_Basic": {
+      "n_seeds": 10,
+      "n_test": 815,
+      "checked": "matches existing CSVs to 1e-6"
+    }
+  },
+  "smoke_workers": 2,
+  "smoke_tag": "recon3",
+  "hyperparameters_by_variant": {
+    "CL/mfmn_base": {
+      "clvd": {
+        "EPOCHS": 400,
+        "LR": 0.003,
+        "WD": 0.01,
+        "PATIENCE": 50,
+        "BATCH": 128,
+        "VAL_FRAC": 0.15,
+        "AUX_WEIGHT": {
+          "CL": 0.8,
+          "VDss": 2.0
+        },
+        "model_defaults": {
+          "MFMN (base)": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "dropout": 0.2
+          },
+          "MFMN_InteractAux": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "interact_rank": 8,
+            "dropout": 0.2
+          },
+          "MFMN_DynGate": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "interact_rank": 8,
+            "dropout": 0.2
+          }
+        }
+      }
+    },
+    "CL/interactaux": {
+      "clvd": {
+        "EPOCHS": 400,
+        "LR": 0.003,
+        "WD": 0.01,
+        "PATIENCE": 50,
+        "BATCH": 128,
+        "VAL_FRAC": 0.15,
+        "AUX_WEIGHT": {
+          "CL": 0.8,
+          "VDss": 2.0
+        },
+        "model_defaults": {
+          "MFMN (base)": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "dropout": 0.2
+          },
+          "MFMN_InteractAux": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "interact_rank": 8,
+            "dropout": 0.2
+          },
+          "MFMN_DynGate": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "interact_rank": 8,
+            "dropout": 0.2
+          }
+        }
+      }
+    },
+    "VDss/mfmn_base": {
+      "clvd": {
+        "EPOCHS": 400,
+        "LR": 0.003,
+        "WD": 0.01,
+        "PATIENCE": 50,
+        "BATCH": 128,
+        "VAL_FRAC": 0.15,
+        "AUX_WEIGHT": {
+          "CL": 0.8,
+          "VDss": 2.0
+        },
+        "model_defaults": {
+          "MFMN (base)": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "dropout": 0.2
+          },
+          "MFMN_InteractAux": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "interact_rank": 8,
+            "dropout": 0.2
+          },
+          "MFMN_DynGate": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "interact_rank": 8,
+            "dropout": 0.2
+          }
+        }
+      }
+    },
+    "VDss/dyngate": {
+      "clvd": {
+        "EPOCHS": 400,
+        "LR": 0.003,
+        "WD": 0.01,
+        "PATIENCE": 50,
+        "BATCH": 128,
+        "VAL_FRAC": 0.15,
+        "AUX_WEIGHT": {
+          "CL": 0.8,
+          "VDss": 2.0
+        },
+        "model_defaults": {
+          "MFMN (base)": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "dropout": 0.2
+          },
+          "MFMN_InteractAux": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "interact_rank": 8,
+            "dropout": 0.2
+          },
+          "MFMN_DynGate": {
+            "self": "<required>",
+            "context_dim": "<required>",
+            "factor_raw_dims": "<required>",
+            "factor_names": "<required>",
+            "targets": [
+              "CL",
+              "VDss"
+            ],
+            "factor_dim": 8,
+            "interact_rank": 8,
+            "dropout": 0.2
+          }
+        }
+      }
+    },
+    "Fu/mfmn_base_untuned": {
+      "fuC1": {
+        "fit_predict_defaults": {
+          "train_smi": "<required>",
+          "test_smi": "<required>",
+          "y_train": "<required>",
+          "seed": "<required>",
+          "val_frac": 0.15,
+          "epochs": 400,
+          "lr": 0.003,
+          "wd": 0.01,
+          "patience": 50,
+          "batch_size": 128,
+          "aux_weight": 0.3,
+          "verbose": false,
+          "ctx_variant": "pca32",
+          "factor_dim": 8,
+          "interact_rank": 8,
+          "dropout": 0.2,
+          "factor_blocks_fn": "<function build_factor_blocks at 0x73360ec9eca0>"
+        },
+        "model": "MFMN_InteractAux (aux-target loss)",
+        "AUX_WEIGHT": 0.3
+      },
+      "fuC2": {
+        "RECONSTRUCTED": true,
+        "model": "MFMN (plain base class)",
+        "loop": "verbatim fit_predict_dyngate source with 2 textual substitutions (MFMN_DynGate->MFMN; interact_rank kwarg dropped)",
+        "recipe": {
+          "ctx_variant": "pca32"
+        },
+        "fit_predict_defaults": {
+          "train_smi": "<required>",
+          "test_smi": "<required>",
+          "y_train": "<required>",
+          "seed": "<required>",
+          "ctx_variant": "<required>",
+          "val_frac": 0.15,
+          "epochs": 400,
+          "lr": 0.003,
+          "wd": 0.01,
+          "patience": 50,
+          "batch_size": 128,
+          "factor_dim": 8,
+          "interact_rank": 8,
+          "dropout": 0.2,
+          "verbose": false
+        },
+        "candidate": "C2: 'untuned' defaults: pca32 context, dropout 0.2, wd 1e-2 (the settings of expv2_aux_targets_final)"
+      },
+      "fuC3": {
+        "RECONSTRUCTED": true,
+        "model": "MFMN (plain base class)",
+        "loop": "verbatim fit_predict_dyngate source with 2 textual substitutions (MFMN_DynGate->MFMN; interact_rank kwarg dropped)",
+        "recipe": {
+          "ctx_variant": "raw_fcfp",
+          "dropout": 0.35,
+          "wd": 0.03
+        },
+        "fit_predict_defaults": {
+          "train_smi": "<required>",
+          "test_smi": "<required>",
+          "y_train": "<required>",
+          "seed": "<required>",
+          "ctx_variant": "<required>",
+          "val_frac": 0.15,
+          "epochs": 400,
+          "lr": 0.003,
+          "wd": 0.01,
+          "patience": 50,
+          "batch_size": 128,
+          "factor_dim": 8,
+          "interact_rank": 8,
+          "dropout": 0.2,
+          "verbose": false
+        },
+        "candidate": "C3: Fu tuned recipe RECIPE['Fu'] (raw_fcfp context, dropout 0.35, wd 3e-2) with plain MFMN"
+      }
+    },
+    "Fu/dyngate_unweighted": {
+      "fuA": {
+        "RECIPE_Fu": {
+          "ctx_variant": "raw_fcfp",
+          "dropout": 0.35,
+          "wd": 0.03
+        },
+        "fit_predict_dyngate_defaults": {
+          "train_smi": "<required>",
+          "test_smi": "<required>",
+          "y_train": "<required>",
+          "seed": "<required>",
+          "ctx_variant": "<required>",
+          "val_frac": 0.15,
+          "epochs": 400,
+          "lr": 0.003,
+          "wd": 0.01,
+          "patience": 50,
+          "batch_size": 128,
+          "factor_dim": 8,
+          "interact_rank": 8,
+          "dropout": 0.2,
+          "verbose": false
+        },
+        "model": "MFMN_DynGate",
+        "sample_weights": "none"
+      },
+      "fuB": {
+        "DROPOUT": 0.35,
+        "WD": 0.03,
+        "FACTOR_DIM": 8,
+        "INTERACT_RANK": 8,
+        "EPOCHS": 400,
+        "LR": 0.003,
+        "PATIENCE": 50,
+        "BATCH": 128,
+        "VAL_FRAC": 0.15,
+        "lowfu_multiplier": 1.0,
+        "lowfu_thresh": 0.006,
+        "model": "MFMN_DynGate",
+        "model_defaults": {
+          "self": "<required>",
+          "context_dim": "<required>",
+          "factor_raw_dims": "<required>",
+          "factor_names": "<required>",
+          "targets": [
+            "CL",
+            "VDss"
+          ],
+          "factor_dim": 8,
+          "interact_rank": 8,
+          "dropout": 0.2
+        }
+      }
+    },
+    "pKa_Acidic/no_xtb": {
+      "pka_no_xtb": {
+        "RECONSTRUCTED": true,
+        "modification": {
+          "no_xtb": "node dim 36->33 (xTB atom charge, attached-H charge sum/max removed; SMARTS site flag kept), edge dim 8->7 (xTB Wiberg bond order removed)"
+        },
+        "HIDDEN_DIM": 128,
+        "N_LAYERS": 4,
+        "DROPOUT_GNN": 0.1,
+        "EPOCHS_GNN": 300,
+        "LR_GNN": 0.0005,
+        "BATCH_GNN": 64,
+        "PATIENCE_GNN": 40,
+        "VAL_FRAC_GNN": 0.15,
+        "weight_decay": 1e-05,
+        "clip_grad_norm": 5.0
+      }
+    },
+    "pKa_Acidic/no_edge_gating": {
+      "pka_no_edge_gating": {
+        "RECONSTRUCTED": true,
+        "modification": {
+          "no_edge_gating": "MPNNLayer message = msg_linear(h_j) * adj_mask; edge_gate output replaced by 1 (edge_gate module still constructed, unused)"
+        },
+        "HIDDEN_DIM": 128,
+        "N_LAYERS": 4,
+        "DROPOUT_GNN": 0.1,
+        "EPOCHS_GNN": 300,
+        "LR_GNN": 0.0005,
+        "BATCH_GNN": 64,
+        "PATIENCE_GNN": 40,
+        "VAL_FRAC_GNN": 0.15,
+        "weight_decay": 1e-05,
+        "clip_grad_norm": 5.0
+      }
+    },
+    "pKa_Acidic/no_site_readout": {
+      "pka_no_site_readout": {
+        "RECONSTRUCTED": true,
+        "modification": {
+          "no_site_readout": "readout = LayerNorm([mean_pool, max_pool]) (2H) instead of [site, mean, max] (3H); finetune head input 2H; the is_acidic_site node-feature flag is kept"
+        },
+        "HIDDEN_DIM": 128,
+        "N_LAYERS": 4,
+        "DROPOUT_GNN": 0.1,
+        "EPOCHS_GNN": 300,
+        "LR_GNN": 0.0005,
+        "BATCH_GNN": 64,
+        "PATIENCE_GNN": 40,
+        "VAL_FRAC_GNN": 0.15,
+        "weight_decay": 1e-05,
+        "clip_grad_norm": 5.0
+      }
+    },
+    "pKa_Basic/no_xtb": {
+      "pka_no_xtb": {
+        "RECONSTRUCTED": true,
+        "modification": {
+          "no_xtb": "node dim 36->33 (xTB atom charge, attached-H charge sum/max removed; SMARTS site flag kept), edge dim 8->7 (xTB Wiberg bond order removed)"
+        },
+        "HIDDEN_DIM": 128,
+        "N_LAYERS": 4,
+        "DROPOUT_GNN": 0.1,
+        "EPOCHS_GNN": 300,
+        "LR_GNN": 0.0005,
+        "BATCH_GNN": 64,
+        "PATIENCE_GNN": 40,
+        "VAL_FRAC_GNN": 0.15,
+        "weight_decay": 1e-05,
+        "clip_grad_norm": 5.0
+      }
+    },
+    "pKa_Basic/no_edge_gating": {
+      "pka_no_edge_gating": {
+        "RECONSTRUCTED": true,
+        "modification": {
+          "no_edge_gating": "MPNNLayer message = msg_linear(h_j) * adj_mask; edge_gate output replaced by 1 (edge_gate module still constructed, unused)"
+        },
+        "HIDDEN_DIM": 128,
+        "N_LAYERS": 4,
+        "DROPOUT_GNN": 0.1,
+        "EPOCHS_GNN": 300,
+        "LR_GNN": 0.0005,
+        "BATCH_GNN": 64,
+        "PATIENCE_GNN": 40,
+        "VAL_FRAC_GNN": 0.15,
+        "weight_decay": 1e-05,
+        "clip_grad_norm": 5.0
+      }
+    },
+    "pKa_Basic/no_site_readout": {
+      "pka_no_site_readout": {
+        "RECONSTRUCTED": true,
+        "modification": {
+          "no_site_readout": "readout = LayerNorm([mean_pool, max_pool]) (2H) instead of [site, mean, max] (3H); finetune head input 2H; the is_acidic_site node-feature flag is kept"
+        },
+        "HIDDEN_DIM": 128,
+        "N_LAYERS": 4,
+        "DROPOUT_GNN": 0.1,
+        "EPOCHS_GNN": 300,
+        "LR_GNN": 0.0005,
+        "BATCH_GNN": 64,
+        "PATIENCE_GNN": 40,
+        "VAL_FRAC_GNN": 0.15,
+        "weight_decay": 1e-05,
+        "clip_grad_norm": 5.0
+      }
+    }
+  }
+}

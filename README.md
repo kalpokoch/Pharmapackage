@@ -23,6 +23,13 @@ using a multi-seed ensemble, matching the actual final-confirmation scripts this
 project's own historical best-vs-paper confirmations almost exactly — this is a faithful
 reproduction, not a fresh/different result.
 
+## Update: 10-seed retrained results
+
+All five proposed models were retrained with 10 seeds and re-evaluated on the official test splits, together with untuned
+baselines and a 10-seed ablation for CL/VDss. See [`results_10seed/`](results_10seed/README.md) for the numbers, tables and
+figures. The table above (and the executed notebooks) are unchanged and remain the original 5/10-seed notebook runs. The Fu and
+pKa ablations are not yet included (Fu variants blocked; pKa runs in progress).
+
 ## Quick start
 
 ```bash

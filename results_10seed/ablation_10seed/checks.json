@@ -1,0 +1,32 @@
+{
+  "all_passed": true,
+  "messages": [
+    "final CL R2: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final CL MAE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final CL RMSE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final VDss R2: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=0.00e+00",
+    "final VDss MAE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final VDss RMSE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final Fu R2: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=0.00e+00",
+    "final Fu MAE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final Fu RMSE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final pKa_Acidic R2: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=1.11e-16",
+    "final pKa_Acidic MAE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final pKa_Acidic RMSE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=0.00e+00",
+    "final pKa_Basic R2: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=1.11e-16",
+    "final pKa_Basic MAE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=5.55e-17",
+    "final pKa_Basic RMSE: recomputed (this script) vs existing per_seed_metrics.csv max|diff|=0.00e+00",
+    "CL/mfmn_base: y_test identical to final's: True",
+    "CL/mfmn_base: row-to-seed mapping consistent (preds/seeds_done.json/per_seed_metrics.csv): True; recomputed vs stored per-seed metrics max|diff|=5.55e-17",
+    "CL/mfmn_base: seeds present 10/10",
+    "CL/interactaux: y_test identical to final's: True",
+    "CL/interactaux: row-to-seed mapping consistent (preds/seeds_done.json/per_seed_metrics.csv): True; recomputed vs stored per-seed metrics max|diff|=5.55e-17",
+    "CL/interactaux: seeds present 10/10",
+    "VDss/mfmn_base: y_test identical to final's: True",
+    "VDss/mfmn_base: row-to-seed mapping consistent (preds/seeds_done.json/per_seed_metrics.csv): True; recomputed vs stored per-seed metrics max|diff|=5.55e-17",
+    "VDss/mfmn_base: seeds present 10/10",
+    "VDss/dyngate: y_test identical to final's: True",
+    "VDss/dyngate: row-to-seed mapping consistent (preds/seeds_done.json/per_seed_metrics.csv): True; recomputed vs stored per-seed metrics max|diff|=5.55e-17",
+    "VDss/dyngate: seeds present 10/10"
+  ]
+}
