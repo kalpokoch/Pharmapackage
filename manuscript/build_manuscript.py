@@ -149,7 +149,7 @@ def main():
          f"strategies rest on the same foundation: the quality of the structure-derived parameter predictions that "
          f"enter them {cite('chou2023', 'geci2024')}.")
     f_ctx = num.fig_label()
-    doc.add_picture(str(ROOT / "Diagram" / "From Structure to Smarter Decisions.png"), width=Inches(6.5))
+    doc.add_picture(str(ROOT / "Diagram" / "motivation_figure_drawio.drawio.png"), width=Inches(6.5))
     doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
     fig_caption(f"Fig. {f_ctx}. ", "Where structure-based parameter prediction sits in drug discovery. "
                 "(1) Experimental determination of pharmacokinetic parameters is accurate but slow, "
