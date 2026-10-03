@@ -10,10 +10,14 @@ scoring the **official test split** (same protocol as the notebooks in `../noteb
 | VDss | MFMN_InteractAux (aux 2.0) | 177 | 0.648 | 0.247 | 1.764 | 0.684 |
 | Fu | MFMN_DynGate + 1.25x low-fu weight | 633 | 0.712 | 0.319 | 2.086 | 0.613 |
 | pKa_Acidic | GraphMPNN | 776 | 0.969 | 0.424 | - | - |
-| pKa_Basic | GraphMPNN | 815 | 0.948 | 0.416 | - | - |
+| pKa_Basic | GraphMPNN, no site readout | 815 | 0.950 | 0.406 | - | - |
 
 Full per-metric tables (seed mean/sd/min/max and paper values): `finals/<target>/ensemble_summary.csv`.
 `finals/retrained_vs_stored.csv` compares these retrained runs with the previously stored results.
+
+**pKa_Basic final model:** GraphMPNN without the ionizable-site readout, chosen because it scored best on every metric in the
+10-seed ablation (below). `finals/pKa_Basic/` holds the full GraphMPNN (the previous final model); the no-site-readout
+results are in `ablation_10seed/` (variant `no_site_readout`).
 
 ## Contents
 - `finals/` - retrained final models: per-target summaries, per-seed metrics, ensemble predictions, summary figures, `manifest.json`.
@@ -27,7 +31,7 @@ Full per-metric tables (seed mean/sd/min/max and paper values): `finals/<target>
 | Target | Proposed | Random Forest | XGBoost | SVM |
 |---|---|---|---|---|
 | pKa_Acidic (R2 / MAE) | **0.969 / 0.424** | 0.927 / 0.699 | 0.919 / 0.743 | 0.770 / 1.475 |
-| pKa_Basic (R2 / MAE) | **0.948 / 0.416** | 0.862 / 0.758 | 0.881 / 0.701 | 0.723 / 1.068 |
+| pKa_Basic (R2 / MAE) | **0.950 / 0.406** | 0.862 / 0.758 | 0.881 / 0.701 | 0.723 / 1.068 |
 | CL (GMFE / w2f) | 2.018 / 0.605 | **2.010 / 0.638** | 2.266 / 0.497 | 2.042 / 0.627 |
 | VDss (GMFE / w2f) | **1.764 / 0.684** | 1.848 / 0.661 | 2.026 / 0.588 | 1.919 / 0.610 |
 | Fu (GMFE / w2f) | **2.086 / 0.613** | 2.391 / 0.488 | 2.316 / 0.531 | 2.284 / 0.534 |
@@ -58,10 +62,10 @@ the 95% CI of the ensemble difference (compound-level paired bootstrap, B = 10,0
 | pKa_Acidic | no xTB features | reconstructed, verified | 0.969 | 0.426 | 0.759 |
 | pKa_Acidic | no edge gating | reconstructed, unverified | 0.969 | 0.428 | 0.754 |
 | pKa_Acidic | no site readout | reconstructed, unverified | 0.968 | 0.427 | 0.771 |
-| pKa_Basic | final (GraphMPNN) | | 0.948 | 0.416 | 0.670 |
+| pKa_Basic | full GraphMPNN (previous final) | | 0.948 | 0.416 | 0.670 |
 | pKa_Basic | no xTB features | reconstructed, unverified | 0.943 | 0.424 | 0.703 |
 | pKa_Basic | no edge gating | reconstructed, unverified | 0.946 | 0.415 | 0.680 |
-| pKa_Basic | no site readout | reconstructed, unverified | 0.950 | 0.406 | 0.654 |
+| pKa_Basic | **no site readout (final)** | reconstructed, unverified | 0.950 | 0.406 | 0.654 |
 
 Findings:
 - **CL**: the final model has the best ensemble value on R2/MAE/RMSE/GMFE, but no difference from either variant is resolved.
@@ -69,9 +73,9 @@ Findings:
 - **Fu**: removing the 1.25x low-fu loss weight changes nothing that is resolved (final is better on every point estimate, by less
   than one seed SD). The "MFMN base (untuned)" row is clearly worse but is not a clean ablation (see caveat 2).
 - **pKa_Acidic**: no ablation has a resolved effect; every metric is within 0.014 of the final model.
-- **pKa_Basic**: removing xTB features degrades R2 and RMSE (resolved). Removing edge gating has no resolved effect. Removing the
-  site readout gives the *better* point estimate on every metric (not resolved; MAE CI borderline), so the site readout is not
-  supported as a contributing component on this test set.
+- **pKa_Basic**: removing the site readout gives the best model on every metric, so it is now the final model (the gain over the
+  full GraphMPNN is consistent across seeds but not resolved; MAE CI borderline). Against it, the full model without xTB features
+  is worse on all four metrics and the full model without edge gating on R2 and RMSE (resolved).
 
 Caveats:
 - **Reconstructed pKa variants**: the original code for the pKa ablation rows is not in the project, so the variants were

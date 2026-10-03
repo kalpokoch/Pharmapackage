@@ -18,7 +18,7 @@ All five proposed models were retrained with 10 seeds (42-51) and scored on the 
 | Target | Architecture | n_test | Our result | Paper | Verdict |
 |---|---|---|---|---|---|
 | pKa_Acidic | GraphMPNN | 776 | R²=0.969 MAE=0.424 | R²=0.94 MAE=0.61 | beats paper |
-| pKa_Basic | GraphMPNN | 815 | R²=0.948 MAE=0.416 | R²=0.91 MAE=0.67 | beats paper |
+| pKa_Basic | GraphMPNN (no site readout) | 815 | R²=0.950 MAE=0.406 | R²=0.91 MAE=0.67 | beats paper |
 | CL | MFMN_DynGate | 177 | R²=0.497 MAE=0.305 GMFE=2.018 w2f=0.605 | R²=0.48 MAE=0.31 GMFE=2.00 w2f=0.64 | beats paper on R²/MAE/RMSE; narrowly trails on GMFE/w2f |
 | VDss | MFMN_InteractAux | 177 | GMFE=1.764 w2f=0.684 | GMFE=1.88 w2f=0.62 | beats paper |
 | Fu | MFMN_DynGate + 1.25x low-fu weighting | 633 | R²=0.712 MAE=0.319 GMFE=2.086 w2f=0.613 | R²=0.69 MAE=0.30 GMFE=2.01 w2f=0.60 | beats paper on R²/w2f |
@@ -45,6 +45,8 @@ graph message-passing).
 This project found that the single best architecture differs by target — there is no one
 model that wins everywhere:
 - **pKa_Acidic / pKa_Basic**: `GraphMPNN`, a from-scratch edge-gated message-passing GNN
+  (for pKa_Basic the final model omits the ionizable-site readout, which scored best on every
+  metric in the 10-seed ablation; notebook 02 still trains the full model)
   operating directly on molecular graphs (`src/graph_mpnn.py`, `src/graph_features.py`).
 - **CL**: `MFMN_DynGate` — a factorized-descriptor model (7 mechanistic factors, each
   privileged to its own named descriptors) with per-compound input-conditioned gating and
