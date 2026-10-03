@@ -15,6 +15,7 @@ paper = pd.read_csv(D / "t_paper.csv")
 base = pd.read_csv(D / "t_baselines.csv")
 abl = pd.read_csv(D / "t_ablation.csv")
 pair = pd.read_csv(D / "t_paired_vs_jia.csv")
+down = pd.read_csv(D / "t_downstream.csv")
 
 TITLE = {"pKa_Acidic": "pKa (acidic)", "pKa_Basic": "pKa (basic)", "CL": "CL", "VDss": "VDss", "Fu": "Fu"}
 MODEL = {"pKa_Acidic": "GraphMPNN", "pKa_Basic": "GraphMPNN (no site readout)", "CL": "MFMN-DynGate",
@@ -556,6 +557,180 @@ table(["Endpoint", "Variant", "R²", "MAE", "RMSE", "W1"], rows, [0.85, 1.35, 1.
              "favor of the final model; no mark: CI includes zero; no variant was resolved as better than the final "
              "model. pKa (acidic): final = full GraphMPNN. pKa (basic): final = GraphMPNN without the ionizable-site "
              "readout; 'full' rows are the complete GraphMPNN and its ablations. Final-model rows are those of Table I."])
+
+# ---------------- F. downstream exposure ----------------
+doc.add_heading("F. Propagation to Predicted Exposure", level=2)
+
+
+def dv(ep, arm, metric):
+    return down[(down.endpoint == ep) & (down.arm == arm) & (down.metric == metric)].iloc[0]
+
+
+OURS_ARM, JIA_ARM = "This work (10-seed)", "Jia et al. QSAR"
+n_down = int(down.n_test.iloc[0])
+para(f"A natural question is whether improved parameter predictions translate into better predicted exposure. "
+     f"Table VIII addresses this on the same {n_down} compounds of Section C, holding the downstream model fixed and "
+     f"varying only the source of CL and VDss. Under the simplest exposure model consistent with the dose-linearity "
+     f"and 1 mg/kg normalization used throughout this benchmark — a one-compartment intravenous model — the area "
+     f"under the concentration–time curve and the maximum concentration follow in closed form from CL, VDss and the "
+     f"infusion duration: AUC = D/CL, and Cmax = D/V for a bolus or (R₀/CL)(1 − e^(−kT)) for an infusion "
+     f"of duration T, with R₀ = D/T and k = CL/V. Parameter error can therefore be propagated to exposure error "
+     f"analytically, with no fitted downstream model and no training data.")
+para(["What this quantifies is ", ("how parameter error propagates into exposure error", "i"),
+      " with the downstream model held constant; it is not a measurement of absolute concentration–time profile "
+      "accuracy, and it is not comparable with exposure errors obtained by scoring predicted profiles against "
+      "observed profiles. Two consequences of the model should be stated before the numbers are read. First, because "
+      "AUC = D/CL exactly, the AUC fold error is identically the CL fold error, so the AUC row carries no information "
+      "beyond the CL results of Tables I–IV; it is reported for completeness. Cmax, which depends on CL, VDss and "
+      "infusion time jointly, is the only genuinely new quantity. Second, Fu does not enter a one-compartment model "
+      "at all, so this analysis is silent on it; under a physiologically based model Fu would act through tissue "
+      "partitioning, which this model does not represent."])
+para(f"No difference is resolved. For Cmax the proposed parameters give the lower geometric mean fold error "
+     f"({f(dv('Cmax',OURS_ARM,'GMFE').value)} vs. {f(dv('Cmax',JIA_ARM,'GMFE').value)}) and the higher fraction within "
+     f"two-fold ({f(dv('Cmax',OURS_ARM,'within_2fold').value)} vs. {f(dv('Cmax',JIA_ARM,'within_2fold').value)}), but "
+     f"the paired differences are not resolved (GMFE difference {f(dv('Cmax',OURS_ARM,'GMFE').diff_ours_minus_jia)}, "
+     f"95% CI [{f(dv('Cmax',OURS_ARM,'GMFE').diff_ci_lo)}, {f(dv('Cmax',OURS_ARM,'GMFE').diff_ci_hi)}]). For AUC the "
+     f"two parameter sources are indistinguishable, as the equivalence with CL requires. The ensemble again "
+     f"outperforms the average individual seed on every exposure metric (Cmax GMFE "
+     f"{f(dv('Cmax',OURS_ARM,'GMFE').value)} for the ensemble vs. {f(dv('Cmax',OURS_ARM,'GMFE').seed_mean)} ± "
+     f"{f(dv('Cmax',OURS_ARM,'GMFE').seed_sd)} across seeds).")
+
+caption("Table VIII\n", "Propagation of predicted CL and VDss to exposure under a one-compartment IV model")
+rows, bolds = [], set()
+for ep in ["AUC", "Cmax"]:
+    for i, metric in enumerate(["R2", "GMFE", "within_2fold"]):
+        rj, ro = dv(ep, JIA_ARM, metric), dv(ep, OURS_ARM, metric)
+        better = (ro.value > rj.value) if HIGHER[metric] else (ro.value < rj.value)
+        rows.append([f"{ep} (n = {n_down})" if i == 0 else "", MLAB[metric],
+                     f"{f(rj.value)} [{f(rj.value_ci_lo)}, {f(rj.value_ci_hi)}]",
+                     f"{f(ro.value)} [{f(ro.value_ci_lo)}, {f(ro.value_ci_hi)}]",
+                     f"[{ro.diff_ci_lo:+.3f}, {ro.diff_ci_hi:+.3f}]".replace("-", "−")])
+        bolds.add((len(rows) - 1, 3 if better else 2))
+table(["Exposure", "Metric", "From benchmark parameters [95% CI]", "From this work's parameters [95% CI]",
+       "95% CI of difference"], rows, [0.9, 0.6, 1.55, 1.55, 1.2], bold_cells=bolds,
+      notes=["One-compartment IV model, dose linearity, 1 mg/kg; observed CL and VDss define the reference exposure. "
+             "R² on log10 exposure; GMFE and W2F on the linear scale. CIs: compound-level bootstrap, B = 10 000; "
+             "differences paired as in Table IV. No difference is resolved. AUC fold error is identically CL fold "
+             "error under this model. These values are not comparable with exposure errors obtained by scoring "
+             "predicted concentration–time profiles against observed profiles."])
+
+doc.add_picture(str(D / "fig6_downstream.png"), width=Inches(6.5))
+doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+fig_caption("Fig. 6. ", "Per-compound exposure fold error from the benchmark's parameters (horizontal) against this "
+            "work's (vertical), under the one-compartment model. The shaded square marks compounds within two-fold "
+            "for both; points below the identity line are compounds for which this work's parameters give the closer "
+            "exposure.")
+
+# ================================================================== DISCUSSION
+doc.add_heading("VI. Discussion", level=1)
+
+doc.add_heading("A. Where the Proposed Models Improve, and Where They Do Not", level=2)
+para(f"The five endpoints divide cleanly. On the two pKa endpoints the proposed GraphMPNN models improve on the "
+     f"published benchmark by a margin that survives every test applied here: the published values lie outside the "
+     f"bootstrap confidence intervals of the ensemble metrics (Table III), and on the subset where the benchmark's own "
+     f"per-compound predictions are available the improvement is resolved by a paired test on R², MAE and RMSE for "
+     f"both endpoints (Table IV). The effect is large rather than marginal — on pKa (basic) the paired MAE falls from "
+     f"{f(pv('pKa_Basic','MAE').jia)} to {f(pv('pKa_Basic','MAE').ours)}, and the proposed model is the closer "
+     f"prediction for 76 of the {int(pair.n_test.iloc[0])} compounds. On the three pharmacokinetic endpoints the "
+     f"picture is different: the ensembles are at least as good as the benchmark on most metrics and better on several "
+     f"point estimates, but no difference is resolved, and on the full test split the benchmark retains the better "
+     f"GMFE and within-two-fold fraction for CL (Table III).")
+para("The most plausible reading is that the gap reflects what each endpoint's data can support rather than a "
+     "difference in modeling effort. pKa is a thermodynamic property of the molecular structure itself, measured "
+     "reproducibly, and the training sets here are the largest of the five. A message-passing network operating on "
+     "the molecular graph with xTB-derived electronic features can exploit that structure directly, and the ablation "
+     "confirms that the electronic features carry real signal for pKa (basic). CL, VDss and Fu are whole-organism "
+     "properties whose reference values aggregate inter-individual variability, differing assay protocols and "
+     "literature curation decisions; their test sets here are also far smaller, 177 compounds for CL and VDss. Both "
+     "factors compress the achievable range of performance and widen every confidence interval, so that even "
+     "consistent point-estimate advantages — the proposed model holds the better value on every VDss and Fu metric in "
+     "Table IV — fail to resolve.")
+para(f"Two observations recur across every analysis and are worth separating from the endpoint-specific findings. "
+     f"First, ensembling is not cosmetic: on all five endpoints the 10-seed ensemble beats the average individual "
+     f"seed on every metric, and the gap is large enough to change conclusions. CL is the clearest case, where the "
+     f"ensemble R² of {f(m('CL','R2').ensemble)} exceeds the published {f(pa.loc[('CL','R2'),'paper'],2)} while "
+     f"the seed mean of {f(m('CL','R2').seed_mean)} does not. Any comparison of this kind should therefore state "
+     f"whether an ensemble or a single model is being reported. Second, the seed-to-seed standard deviation is "
+     f"substantial relative to the differences under discussion — up to "
+     f"{f(main[main.metric=='R2'].seed_sd.max())} in R² — which is why a comparison based on a single "
+     f"seed per architecture is difficult to interpret.")
+
+doc.add_heading("B. What the Ablations Show", level=2)
+para(f"The component ablations resolve far less than is usually claimed for architectural choices. On CL, none of the "
+     f"differences between the final MFMN-DynGate, MFMN-InteractAux and the base MFMN is resolved, although the "
+     f"ordering is consistent and the seed-to-seed variance falls markedly as components are added "
+     f"({f(av('CL','MFMN (base)','R2').seed_sd)} to {f(m('CL','R2').seed_sd)} in R² standard deviation). On VDss "
+     f"the auxiliary supervision is clearly load-bearing: removing it costs "
+     f"{f(av('VDss','MFMN (base)','GMFE').diff_final_minus_variant).lstrip('-')} in GMFE with the CI excluding zero, "
+     f"whereas exchanging one gating mechanism for the other changes nothing resolvable. On pKa (basic) the "
+     f"xTB-derived features are the component that matters, and on pKa (acidic) no component is resolved at all.")
+para("Read together, these results suggest that for this family of problems the choice of representation — graph "
+     "versus descriptor, with or without electronic features — matters more than the particular gating or attention "
+     "mechanism layered on top, and that several of the architectural refinements are within seed noise on the test "
+     "sets available. That is a limitation of the evidence as much as a claim about the architectures: with 177 "
+     "compounds, differences smaller than roughly one seed standard deviation cannot be detected.")
+
+doc.add_heading("C. Does Better Parameter Prediction Improve Predicted Exposure?", level=2)
+para(f"Section F answers this directly for the quantities a one-compartment model can express, and the answer is that "
+     f"it does not, measurably, on these {n_down} compounds. The result deserves care rather than dismissal. The AUC "
+     f"comparison is not independent evidence at all: AUC = D/CL makes its fold error identical to the CL fold error, "
+     f"so it restates an endpoint on which the two models were already indistinguishable. Cmax is the informative "
+     f"quantity, and there the proposed parameters give a lower GMFE "
+     f"({f(dv('Cmax',OURS_ARM,'GMFE').value)} vs. {f(dv('Cmax',JIA_ARM,'GMFE').value)}) and a higher within-two-fold "
+     f"fraction, in the direction the VDss results predict, but without reaching resolution on a sample this size.")
+para(["Two structural features of the problem limit what this analysis can show. The benchmark's own feature-importance "
+      "analysis for its downstream model ", ("[REF: Jia et al., Supporting Information, Table S6]", "needs"),
+      " ranks CL and VDss far above the remaining parameters, with Fu last, which "
+      "supports propagating exactly those two but also implies that improvements concentrated in the other parameters "
+      "cannot express themselves downstream. More fundamentally, the endpoints on which the proposed models improve "
+      "most — the two pKa constants — have almost no influence on exposure in this framework, while the endpoint that "
+      "dominates exposure, CL, is the one on which the two models are closest. A substantial gain in pKa prediction "
+      "can therefore coexist with no measurable gain in predicted exposure without any inconsistency. Confirming this "
+      "properly would require the observed concentration–time data, which is not publicly available for this "
+      "benchmark; the comparison reported here is the strongest that can be made without it."])
+
+doc.add_heading("D. Limitations", level=2)
+para(f"Each endpoint is evaluated on a single official held-out split, so the results characterize performance on "
+     f"those particular compounds and inherit their composition. The CL and VDss splits contain 177 compounds each, "
+     f"and the paired comparison of Table IV and the exposure analysis of Table VIII rest on {n_down}; at these sizes "
+     f"only large differences resolve, and the absence of a resolved difference is not evidence of equivalence. No "
+     f"cross-validated estimate for the final models is reported here, so the stability of these results across "
+     f"alternative partitions of the same data is not established.")
+para(["The comparison is against a single published benchmark, and for most of the test data that benchmark reports "
+      "aggregate values only, which is why Table III can report no more than whether a published point estimate falls "
+      "inside a confidence interval. Published values were transcribed from the source and should be re-verified "
+      "before submission. The classical baselines of Section D use library defaults and are intended as a reference "
+      "point for the difficulty of each endpoint, not as tuned competitors."])
+para("The exposure analysis of Section F inherits the assumptions of a one-compartment intravenous model with linear "
+     "kinetics and a 1 mg/kg normalization. Real disposition is frequently multi-compartmental, and the model cannot "
+     "represent tissue partitioning, protein binding or saturable elimination; its value here is that it is identical "
+     "across the arms being compared, not that it describes any compound exactly. Its results therefore bound how "
+     "much the parameter improvements could matter under that model, and say nothing about absolute profile accuracy.")
+
+# ================================================================== CONCLUSION
+doc.add_heading("VII. Conclusion", level=1)
+para(f"This work reproduced and extended the first stage of a published intravenous pharmacokinetics benchmark, "
+     f"training a graph message-passing network for the two pKa endpoints and a family of factorized-descriptor "
+     f"networks for clearance, volume of distribution and fraction unbound, each as a 10-seed ensemble fitted on the "
+     f"official training split and scored once on the official held-out test split. On the pKa endpoints the proposed "
+     f"models improve on the benchmark substantially and the improvement is statistically resolved, both against the "
+     f"published values and, on the subset where the benchmark's per-compound predictions are available, by a paired "
+     f"test: R² rises to {f(m('pKa_Acidic','R2').ensemble)} and {f(m('pKa_Basic','R2').ensemble)} for the acidic "
+     f"and basic endpoints, with mean absolute errors of {f(m('pKa_Acidic','MAE').ensemble)} and "
+     f"{f(m('pKa_Basic','MAE').ensemble)} pKa units. On clearance, volume of distribution and fraction unbound the "
+     f"proposed models are comparable to the benchmark, better on several point estimates and worse on others, with "
+     f"no difference resolved.")
+para("Propagating the predicted parameters through a fixed one-compartment exposure model produced no resolved "
+     "improvement in predicted AUC or Cmax. That outcome is consistent with the parameter-level results rather than "
+     "in tension with them, since exposure in this framework is governed largely by clearance, the endpoint on which "
+     "the two models are closest, and is insensitive to the pKa constants on which they differ most. Establishing "
+     "whether improved parameter prediction benefits full concentration–time prediction would require the observed "
+     "profile data underlying the benchmark.")
+para("Two methodological points generalize beyond this benchmark. Multi-seed ensembling changed the sign of several "
+     "comparisons relative to single models and should be reported explicitly rather than left implicit. And across "
+     "the ablations, differences between architectural variants were frequently smaller than the variation between "
+     "random seeds of the same architecture, so claims about component contributions on test sets of this size "
+     "require seed-level variability to be quantified before they can be sustained.")
 
 out = D / "Results_section_draft.docx"
 doc.save(out)
