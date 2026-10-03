@@ -217,3 +217,70 @@ def verdict(lo, hi, higher_is_better, better="ours", worse="jia"):
     if hi < 0:
         return f"{worse if higher_is_better else better} better (CI excludes 0)"
     return "CI includes 0"
+
+
+# ------------------------------------------- paired step-1 comparison vs Jia et al.
+
+PAIRED_SPEC = {
+    # endpoint: (SI observed column, SI predicted column, values are log10-modelled by us)
+    "pKa_Acidic": ("pKa_Acidic", "pred_pKa_Acidic", False),
+    "pKa_Basic": ("pKa_Basic", "pred_pKa_Basic", False),
+    "CL": (CL_OBS, CL_JIA, True),
+    "VDss": (VD_OBS, VD_JIA, True),
+    "Fu": (FU_OBS, FU_JIA, True),
+}
+
+
+def load_paired_predictions(si_path=SI_PATH, results_dir=None):
+    """Our predictions and Jia et al.'s, for the same 106 compounds, for all five endpoints.
+
+    Jia et al.'s per-compound predictions exist only in sheet `106_cmp_test_set`, so a paired
+    comparison is possible on those 106 compounds and nowhere else. Returns
+    {endpoint: DataFrame[PubChem_CID, Name, y_obs, y_jia, y_ours, seeds]} with every column in
+    the space the endpoint is modelled in (log10 for CL/VDss/Fu, raw pKa units otherwise), plus
+    a [10, 106] per-seed array.
+
+    Joins: CL/VDss by `row_idx` -> PUBCHEM_CID (as in `load_ours`); pKa/Fu by the parent SMILES
+    of sheet `pKas_modeling_set`, which is the `id` of our pKa and Fu prediction files. Asserts
+    106 rows, uniqueness, and that the observed values agree with ours.
+    """
+    results_dir = results_dir or os.path.join(ROOT, "results", "final_models")
+    x = pd.ExcelFile(si_path)
+    test = load_test_set(si_path)
+    pk = x.parse(MODELING_SHEET.replace("Fu_VDss_CL_modeling_set", "pKas_modeling_set"))
+    smiles = pk.set_index("PUBCHEM_CID").reindex(test.PubChem_CID)["SMILES_parent"].to_numpy()
+    assert pd.notna(smiles).all(), "parent SMILES missing for some of the 106 compounds"
+    cid = _cid_map()
+
+    out = {}
+    for endpoint, (obs_col, jia_col, is_log) in PAIRED_SPEC.items():
+        ours = pd.read_csv(os.path.join(results_dir, endpoint, "ensemble_predictions.csv"))
+        per_seed = np.load(os.path.join(results_dir, endpoint, "per_seed_preds.npy")).astype(float)
+        assert per_seed.shape == (10, len(ours))
+        ours = ours.assign(_pos=np.arange(len(ours)))
+
+        left = test[["PubChem_CID", "Name_trend", obs_col, jia_col]].copy()
+        if endpoint in ("CL", "VDss"):
+            ours = ours.merge(cid, left_on="id", right_on="row_idx", how="left", validate="one_to_one")
+            j = left.merge(ours, left_on="PubChem_CID", right_on="PUBCHEM_CID", how="left", validate="one_to_one")
+        else:
+            j = left.assign(_sm=smiles).merge(ours, left_on="_sm", right_on="id", how="left", validate="one_to_one")
+        assert len(j) == N_TEST, f"{endpoint}: join produced {len(j)} rows"
+        missing = j.loc[j.y_pred_ensemble.isna(), "PubChem_CID"].tolist()
+        assert not missing, f"{endpoint}: {len(missing)} compounds absent from our predictions: {missing}"
+
+        obs_si = j[obs_col].to_numpy(float)
+        jia = j[jia_col].to_numpy(float)
+        assert np.isfinite(obs_si).all() and np.isfinite(jia).all(), endpoint
+        if is_log:
+            assert (obs_si > 0).all() and (jia > 0).all(), f"{endpoint}: non-positive value cannot be log10-transformed"
+            obs_si, jia = np.log10(obs_si), np.log10(jia)
+        assert np.allclose(j.y_true.to_numpy(float), obs_si, rtol=1e-2, atol=1e-2), \
+            f"{endpoint}: our observed values disagree with the SI's -- join is wrong"
+
+        pos = j._pos.to_numpy(int)
+        out[endpoint] = (pd.DataFrame({
+            "PubChem_CID": j.PubChem_CID, "Name": j.Name_trend,
+            "y_obs": j.y_true.to_numpy(float), "y_jia": jia, "y_ours": j.y_pred_ensemble.to_numpy(float),
+        }), per_seed[:, pos])
+    return out

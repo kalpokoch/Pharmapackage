@@ -14,6 +14,7 @@ main = pd.read_csv(D / "t_main.csv")
 paper = pd.read_csv(D / "t_paper.csv")
 base = pd.read_csv(D / "t_baselines.csv")
 abl = pd.read_csv(D / "t_ablation.csv")
+pair = pd.read_csv(D / "t_paired_vs_jia.csv")
 
 TITLE = {"pKa_Acidic": "pKa (acidic)", "pKa_Basic": "pKa (basic)", "CL": "CL", "VDss": "VDss", "Fu": "Fu"}
 MODEL = {"pKa_Acidic": "GraphMPNN", "pKa_Basic": "GraphMPNN (no site readout)", "CL": "MFMN-DynGate",
@@ -240,9 +241,10 @@ outside = paper[~paper.paper_inside_ci]
 para(["Table III compares the 10-seed ensemble with the published benchmark values on the same official test splits: "
       "Jia et al. ", ("[REF: Jia et al., J. Med. Chem., 2025, 68(7), 7737–7750]", "needs"),
       " for CL, VDss and Fu, and ", ("[NEEDS: citation for the pKa benchmark]", "needs"),
-      " for pKa. The benchmark reports point estimates only, so a paired test against it is not possible; instead, we "
-      "report whether the published value lies inside the bootstrap 95% CI of the ensemble metric. Fig. 2 shows the "
-      "relative differences."])
+      " for pKa. For most of the test set the benchmark reports aggregate values only, so Table III reports whether the "
+      "published value lies inside the bootstrap 95% CI of the ensemble metric, and Fig. 2 shows the relative "
+      "differences. The benchmark does, however, publish its own per-compound predictions for a 106-compound subset; "
+      "Table IV compares the two models on those compounds with a paired test, which is the stronger comparison."])
 pa = paper.set_index(["target", "metric"])
 para(f"The ensemble improves on the published value in {n_better} of the {n_tot} metric–endpoint pairs for which a "
      f"benchmark value is available. On both pKa endpoints, all three metrics improve and the published value lies "
@@ -291,13 +293,73 @@ fig_caption("Fig. 2. ", "Relative difference between the 10-seed ensemble and th
             "bootstrap 95% CI of the ensemble metric expressed relative to the published value. The vertical line "
             "marks parity with the benchmark.")
 
-# ---------------- C. vs untuned baselines ----------------
-doc.add_heading("C. Comparison With Untuned Classical Baselines", level=2)
-para("Table IV compares the proposed models with three classical regressors trained on the same training split and "
+# ---------------- B2. paired comparison on the published-prediction subset ----------------
+doc.add_heading("C. Paired Comparison on the Benchmark's Published Predictions", level=2)
+
+
+def pv(t, metric):
+    return pair[(pair.target == t) & (pair.metric == metric)].iloc[0]
+
+
+n_res = int((pair.verdict != "CI includes 0").sum())
+n_ours = int(pair.verdict.str.startswith("ours").sum())
+para(f"The benchmark publishes per-compound predictions for all five endpoints on a {int(pair.n_test.iloc[0])}-compound "
+     f"subset of the test data. Every one of these compounds lies in the official test split of every endpoint, so "
+     f"neither model was trained on them, and both were evaluated on identical compounds. This permits a paired "
+     f"comparison (Table IV, Fig. 3): the same compound-level bootstrap as above, resampling the same compounds for "
+     f"both models, which removes the compound-to-compound variation that dominates the marginal CIs of Table III. "
+     f"This subset is the only part of the test data for which the benchmark's own predictions are available.")
+para(f"Of the {len(pair)} metric–endpoint pairs, {n_res} are resolved, and all {n_ours} favour the proposed models; "
+     f"none favours the benchmark. Both pKa endpoints improve on R², MAE and RMSE with paired CIs excluding zero: on "
+     f"pKa (acidic), MAE falls from {f(pv('pKa_Acidic','MAE').jia)} to {f(pv('pKa_Acidic','MAE').ours)} "
+     f"(difference {f(pv('pKa_Acidic','MAE').diff_ours_minus_jia)}, 95% CI "
+     f"[{f(pv('pKa_Acidic','MAE').diff_ci_lo)}, {f(pv('pKa_Acidic','MAE').diff_ci_hi)}]), and on pKa (basic) from "
+     f"{f(pv('pKa_Basic','MAE').jia)} to {f(pv('pKa_Basic','MAE').ours)} "
+     f"(CI [{f(pv('pKa_Basic','MAE').diff_ci_lo)}, {f(pv('pKa_Basic','MAE').diff_ci_hi)}]), a reduction of "
+     f"{100*(1-pv('pKa_Basic','MAE').ours/pv('pKa_Basic','MAE').jia):.0f}%. The W1 improvement is also resolved for "
+     f"pKa (basic) ({f(pv('pKa_Basic','within_1_pKa_unit').ours)} vs. "
+     f"{f(pv('pKa_Basic','within_1_pKa_unit').jia)}).")
+para(f"For CL, VDss and Fu no difference is resolved on this subset. The proposed models hold the better point "
+     f"estimate on every VDss and Fu metric (VDss GMFE {f(pv('VDss','GMFE').ours)} vs. {f(pv('VDss','GMFE').jia)}; Fu "
+     f"GMFE {f(pv('Fu','GMFE').ours)} vs. {f(pv('Fu','GMFE').jia)}) and the two models are indistinguishable on CL "
+     f"(GMFE {f(pv('CL','GMFE').ours)} vs. {f(pv('CL','GMFE').jia)}). With {int(pair.n_test.iloc[0])} compounds this "
+     f"subset is smaller than the full test splits of Tables I and II, so it resolves only the larger differences; the "
+     f"absence of a resolved difference is not evidence of equivalence.")
+
+caption("Table IV\n", "Paired comparison with the benchmark's published per-compound predictions")
+rows, bolds = [], set()
+for t in ["pKa_Acidic", "pKa_Basic", "CL", "VDss", "Fu"]:
+    sub = pair[pair.target == t]
+    for i, (_, r) in enumerate(sub.iterrows()):
+        better = (r.ours > r.jia) if HIGHER[r.metric] else (r.ours < r.jia)
+        mark = "†" if r.verdict.startswith("ours") else ("‡" if r.verdict.startswith("jia") else "")
+        rows.append([f"{TITLE[t]} (n = {int(r.n_test)})" if i == 0 else "", MLAB[r.metric], f(r.jia), f(r.ours),
+                     f"{r.diff_ours_minus_jia:+.3f}".replace("-", "\u2212") + mark,
+                     f"[{r.diff_ci_lo:+.3f}, {r.diff_ci_hi:+.3f}]".replace("-", "\u2212")])
+        bolds.add((len(rows) - 1, 3 if better else 2))
+table(["Endpoint", "Metric", "Benchmark", "This work", "Difference", "95% CI of difference"],
+      rows, [1.0, 0.6, 0.85, 0.85, 0.9, 1.3], bold_cells=bolds,
+      notes=["Both models evaluated on the same compounds, the subset for which the benchmark publishes per-compound "
+             "predictions; all of them lie in the official test split of every endpoint. Difference = this work − "
+             "benchmark, oriented by the metric. CI: paired compound-level bootstrap, B = 10 000, the same resampled "
+             "compounds for both models. †: CI excludes zero in favour of this work; ‡: in favour of the benchmark "
+             "(unused — no metric favours the benchmark); no mark: CI includes zero. Bold: better value. MAE and RMSE "
+             "in pKa units (pKa) or log10 units (CL, VDss, Fu)."])
+
+doc.add_picture(str(D / "fig3_paired_vs_jia.png"), width=Inches(6.5))
+doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+fig_caption("Fig. 3. ", "Per-compound absolute error of the benchmark's published predictions (horizontal) against "
+            "this work's (vertical) on the same compounds. Points below the identity line are compounds this work "
+            "predicts more accurately; the panel titles give the count. pKa in pKa units, CL, VDss and Fu in log10 "
+            "units.")
+
+# ---------------- D. vs untuned baselines ----------------
+doc.add_heading("D. Comparison With Untuned Classical Baselines", level=2)
+para("Table V compares the proposed models with three classical regressors trained on the same training split and "
      "evaluated on the same test compounds in the same order: Random Forest (RF), XGBoost (XGB) and support vector "
      "regression (SVM), each with library-default hyperparameters (no tuning). RF was trained with seeds 42–51 and is "
      "reported as a 10-seed ensemble. With default settings, XGB uses no row or column subsampling, so all ten seeds "
-     "produced identical predictions and its ensemble equals a single fit; SVM is deterministic and was fit once. Fig. 3 "
+     "produced identical predictions and its ensemble equals a single fit; SVM is deterministic and was fit once. Fig. 4 "
      "summarizes the headline error metric per endpoint.")
 
 
@@ -321,7 +383,7 @@ para(f"On VDss, the proposed model has the better point estimate on every metric
      f"and W2F ({f(bv('CL','Random Forest','within_2fold').value)} vs. {f(m('CL','within_2fold').ensemble)}), and SVM "
      f"has the better point estimate for W2F ({f(bv('CL','SVM','within_2fold').value)}).")
 
-caption("Table IV\n", "Proposed models versus untuned classical baselines (official test splits)")
+caption("Table V\n", "Proposed models versus untuned classical baselines (official test splits)")
 SETS = {"pKa_Acidic": ["R2", "MAE", "RMSE", "within_1_pKa_unit"], "pKa_Basic": ["R2", "MAE", "RMSE", "within_1_pKa_unit"],
         "CL": ["R2", "MAE", "GMFE", "within_2fold"], "VDss": ["R2", "MAE", "GMFE", "within_2fold"],
         "Fu": ["R2", "MAE", "GMFE", "within_2fold"]}
@@ -358,22 +420,22 @@ hc = t4.rows[0].cells[1].merge(t4.rows[0].cells[4])
 for extra in hc.paragraphs[1:]:
     extra._element.getparent().remove(extra._element)
 
-doc.add_picture(str(D / "fig3_baselines.png"), width=Inches(6.5))
+doc.add_picture(str(D / "fig4_baselines.png"), width=Inches(6.5))
 doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
-fig_caption("Fig. 3. ", "Headline error metric of the proposed models and the untuned baselines on each official "
+fig_caption("Fig. 4. ", "Headline error metric of the proposed models and the untuned baselines on each official "
             "test set (MAE in pKa units for pKa; GMFE for CL, VDss and Fu; lower is better). Error bars: bootstrap "
             "95% CI of each model's metric (B = 10 000). Proposed: GraphMPNN (pKa) or MFMN variant (CL, VDss, Fu).")
 
-# ---------------- D. ablation ----------------
-doc.add_heading("D. Ablation Study", level=2)
-para("Tables V and VI report 10-seed ablations retrained under the same protocol, training split and test split as "
-     "the final models. For CL and VDss (Table V), the final model is compared with the base MFMN (no auxiliary "
+# ---------------- E. ablation ----------------
+doc.add_heading("E. Ablation Study", level=2)
+para("Tables VI and VII report 10-seed ablations retrained under the same protocol, training split and test split as "
+     "the final models. For CL and VDss (Table VI), the final model is compared with the base MFMN (no auxiliary "
      "supervision and no dynamic gating) and with the alternative MFMN variant that differs only in the gating "
-     "mechanism (MFMN-InteractAux for CL; MFMN-DynGate for VDss); Fig. 4 shows the per-seed GMFE distributions. For "
-     "pKa (Table VI), the xTB-derived features, the edge gating and the ionizable-site readout of the full GraphMPNN are "
+     "mechanism (MFMN-InteractAux for CL; MFMN-DynGate for VDss); Fig. 5 shows the per-seed GMFE distributions. For "
+     "pKa (Table VII), the xTB-derived features, the edge gating and the ionizable-site readout of the full GraphMPNN are "
      "removed one at a time; on pKa (basic), the variant without the site readout performed best and is used as the "
      "final model, so the full GraphMPNN and its other two ablations are compared against it. For Fu, the low-fu training-loss weight is removed. Variant–final differences use the same "
-     "paired compound-level bootstrap as Section C.")
+     "paired compound-level bootstrap as Section D.")
 
 
 def av(t, var, metric):
@@ -395,7 +457,7 @@ para(f"On VDss, the final MFMN-InteractAux model improves on the base MFMN on R�
      f"ensemble W2F ({f(av('VDss','MFMN-DynGate','within_2fold').ensemble)} vs. {f(m('VDss','within_2fold').ensemble)}) "
      f"and a lower seed-to-seed SD of R² ({f(av('VDss','MFMN-DynGate','R2').seed_sd)} vs. {f(m('VDss','R2').seed_sd)}).")
 
-caption("Table V\n", "Ablation of the MFMN family on CL and VDss (10 seeds, official test splits)")
+caption("Table VI\n", "Ablation of the MFMN family on CL and VDss (10 seeds, official test splits)")
 rows, bolds = [], set()
 for t in ["CL", "VDss"]:
     order = (["MFMN (base)", "MFMN-InteractAux", "final"] if t == "CL" else ["MFMN (base)", "MFMN-DynGate", "final"])
@@ -428,9 +490,9 @@ table(["Endpoint", "Variant", "R²", "MAE", "GMFE", "W2F"], rows, [0.6, 1.45, 1.
              "rows are the retrained finals of Table II; the ablation variants were compared against the same test "
              "rows."])
 
-doc.add_picture(str(D / "fig4_ablation.png"), width=Inches(3.4))
+doc.add_picture(str(D / "fig5_ablation.png"), width=Inches(3.4))
 doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
-fig_caption("Fig. 4. ", "Per-seed test GMFE (dots, n = 10 per variant) and 10-seed ensemble GMFE (horizontal bar) for "
+fig_caption("Fig. 5. ", "Per-seed test GMFE (dots, n = 10 per variant) and 10-seed ensemble GMFE (horizontal bar) for "
             "the MFMN ablation on CL and VDss. Lower is better.")
 
 PKA_MET = ["R2", "MAE", "RMSE", "within_1_pKa_unit"]
@@ -464,7 +526,7 @@ para(f"On Fu, removing the 1.25× low-fu loss weight leaves performance essentia
      f"{f(m('Fu','within_2fold').ensemble)} for the unweighted and final models, respectively; all paired-difference CIs "
      f"include zero. The final model has the better point estimate on every metric, but the differences are smaller "
      f"than one seed-to-seed SD.")
-caption("Table VI\n", "Ablation of GraphMPNN on pKa (10 seeds, official test splits)")
+caption("Table VII\n", "Ablation of GraphMPNN on pKa (10 seeds, official test splits)")
 rows, bolds = [], set()
 ORDER = {"pKa_Acidic": ["w/o xTB features", "w/o edge gating", "w/o site readout", "final"],
          "pKa_Basic": ["full, w/o xTB features", "full, w/o edge gating", "GraphMPNN (full)", "final"]}

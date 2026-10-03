@@ -10,7 +10,7 @@ accuracy; its numbers are not comparable with any result obtained by scoring aga
 observed concentration-time profiles.
 
 Bootstrap (B, RNG seed, paired resampling, verdict vocabulary) is reused from analysis.py.
-Writes results/downstream/* and manuscript/{t_downstream.csv,fig5_downstream.png}.
+Writes results/downstream/* and manuscript/{t_downstream.csv,fig6_downstream.png}.
 """
 import os
 import sys
@@ -189,7 +189,7 @@ def main():
     print("\nNot comparable with the paper's reported within-2-fold figures for AUC/Cmax: those score predicted "
           "concentration profiles against observed profiles, this scores analytic exposure against "
           "observed-parameter-derived exposure.")
-    print("wrote", OUT_RES, "and", HERE / "t_downstream.csv", HERE / "fig5_downstream.png")
+    print("wrote", OUT_RES, "and", HERE / "t_downstream.csv", HERE / "fig6_downstream.png")
 
 
 def make_figure(per):
@@ -219,7 +219,7 @@ def make_figure(per):
                          "2-fold; points below the diagonal favour this work", ha="center", fontsize=6,
              color=figures.MUTED)
     fig.tight_layout(w_pad=1.4)
-    fig.savefig(HERE / "fig5_downstream.png")
+    fig.savefig(HERE / "fig6_downstream.png")
     plt.close(fig)
 
 
@@ -320,7 +320,7 @@ def write_readme(per, summary, paired, checks, n_blank, n_zero, worst):
               "- `exposure_paired.csv` -- metric x {difference, CI, verdict}.",
               "- `exposure_cmax_bolus_sensitivity.csv` -- Cmax metrics with every compound treated as a bolus.",
               "- `exposure_worst_cmax.csv` -- the 10 worst Cmax fold errors under `ours`.",
-              "- `../../manuscript/t_downstream.csv`, `../../manuscript/fig5_downstream.png`.", ""]
+              "- `../../manuscript/t_downstream.csv`, `../../manuscript/fig6_downstream.png`.", ""]
     (OUT_RES / "README.md").write_text("\n".join(lines))
 
 

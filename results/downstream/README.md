@@ -107,4 +107,4 @@ value was reconstructed, digitized or simulated.
 - `exposure_paired.csv` -- metric x {difference, CI, verdict}.
 - `exposure_cmax_bolus_sensitivity.csv` -- Cmax metrics with every compound treated as a bolus.
 - `exposure_worst_cmax.csv` -- the 10 worst Cmax fold errors under `ours`.
-- `../../manuscript/t_downstream.csv`, `../../manuscript/fig5_downstream.png`.
+- `../../manuscript/t_downstream.csv`, `../../manuscript/fig6_downstream.png`.

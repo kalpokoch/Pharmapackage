@@ -119,7 +119,7 @@ def main():
     fig.legend(handles, ["Proposed", "Random Forest", "XGBoost", "SVM"],
                loc="lower center", ncol=4, frameon=False, bbox_to_anchor=(0.5, -0.06))
     fig.tight_layout(rect=(0, 0.06, 1, 1), w_pad=0.8)
-    fig.savefig(OUT / "fig3_baselines.png")
+    fig.savefig(OUT / "fig4_baselines.png")
     plt.close(fig)
 
     # ---------------- Fig. 4: CL/VDss ablation, per-seed GMFE ----------------
@@ -150,7 +150,7 @@ def main():
     fig.text(0.5, -0.04, "dots: individual seeds (n = 10); bar: 10-seed ensemble", ha="center", fontsize=6,
              color=MUTED)
     fig.tight_layout(w_pad=1.0)
-    fig.savefig(OUT / "fig4_ablation.png")
+    fig.savefig(OUT / "fig5_ablation.png")
     plt.close(fig)
     print("figures done")
 
