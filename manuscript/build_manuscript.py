@@ -322,10 +322,9 @@ def main():
          "standardized using training-fold statistics and predictions are inverted before scoring. The reported "
          "prediction for each compound is the arithmetic mean of the ten seeds' predictions. Training "
          "configurations are given in Table " + num.peek_tables(1)[0] + ".")
-    para("All training and evaluation was performed on an NVIDIA DGX A100 server. Each run was allocated a single "
-         "A100-SXM4-40GB GPU partitioned by Multi-Instance GPU into a 3g.20gb slice, so no run had exclusive use "
-         "of a whole device. Runs are made deterministic within a slice by fixing the Python, NumPy and PyTorch "
-         "seeds, restricting intra-op threading, and enabling deterministic cuDNN kernels.")
+    para("All training and evaluation was performed on an NVIDIA DGX A100 server. Runs are made deterministic by "
+         "fixing the Python, NumPy and PyTorch seeds, restricting intra-op threading, and enabling deterministic "
+         "cuDNN kernels.")
     t_hp = num.table_label()
     caption(f"Table {t_hp}\n", "Training configuration for the two model families")
     rows = [
@@ -372,7 +371,7 @@ def main():
          f"{gnn.sec_per_seed_mean/60:.0f} minutes against under a minute for each pharmacokinetic endpoint, so a "
          f"ten-seed pKa ensemble costs roughly {10*gnn.sec_per_seed_mean/3600:.1f} GPU-hours against about "
          f"{10*vd.sec_per_seed_mean/60:.0f} minutes. These are measured wall-clock times with several seeds "
-         f"training concurrently on the same GPU slice, so they include contention and are upper bounds on the "
+         f"training concurrently on the same GPU, so they include contention and are upper bounds on the "
          f"cost of a dedicated run. Floating-point counts cover the matrix multiplications of a forward pass and "
          f"exclude feature generation, which for both families is dominated by descriptor and semi-empirical "
          f"calculation performed once per compound. The classical baselines of Section "
@@ -391,8 +390,8 @@ def main():
                  "the matrix multiplications of a forward pass; for the graph model the two values are for a "
                  "median-sized and the largest molecule in the pool (26 and 65 heavy atoms), between which cost "
                  "grows quadratically, while the descriptor models are size-independent. Training time is measured "
-                 "wall-clock per seed on one A100-SXM4-40GB MIG 3g.20gb slice of an NVIDIA DGX A100, with several "
-                 "seeds running concurrently on the slice; it therefore includes contention."])
+                 "wall-clock per seed on an NVIDIA DGX A100, with several seeds training concurrently on the same "
+                 "GPU; it therefore includes contention."])
 
     doc.add_heading("G. Evaluation Metrics and Statistics", level=2)
     para("Predictions are scored by the coefficient of determination, mean absolute error and root mean squared "
