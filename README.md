@@ -1,6 +1,6 @@
 # PK/pKa benchmark-paper reproductions — 5 targets
 
-Self-contained, **already-executed** reproduction of this project's current best result for
+Self-contained reproduction of this project's current best result for
 each of the 5 targets modeled in this work, evaluated in the exact configuration used to
 compare against the published benchmark (Jia, X. et al. *"Application of Machine Learning and
 Mechanistic Modeling to Predict Intravenous Pharmacokinetic Profiles in Humans."* J. Med.
@@ -12,26 +12,49 @@ using a multi-seed ensemble, matching the actual final-confirmation scripts this
 ## Results (10-seed retrained, official test split)
 
 All five proposed models were retrained with 10 seeds (42-51) and scored on the official held-out test split
-(ensemble of the 10 seeds). Full tables, per-seed metrics, figures, untuned baselines and the 10-seed ablation of all five targets are in
-[`results_10seed/`](results_10seed/README.md).
+(ensemble of the 10 seeds). Predictions, per-seed metrics, untuned baselines and the 10-seed ablation of all five targets
+are in [`results/`](results/README.md); the Results-section draft and the scripts that build it are in `manuscript/`.
 
 | Target | Architecture | n_test | Our result | Paper | Verdict |
 |---|---|---|---|---|---|
 | pKa_Acidic | GraphMPNN | 776 | R²=0.969 MAE=0.424 | R²=0.94 MAE=0.61 | beats paper |
 | pKa_Basic | GraphMPNN (no site readout) | 815 | R²=0.950 MAE=0.406 | R²=0.91 MAE=0.67 | beats paper |
 | CL | MFMN_DynGate | 177 | R²=0.497 MAE=0.305 GMFE=2.018 w2f=0.605 | R²=0.48 MAE=0.31 GMFE=2.00 w2f=0.64 | beats paper on R²/MAE/RMSE; narrowly trails on GMFE/w2f |
-| VDss | MFMN_InteractAux | 177 | GMFE=1.764 w2f=0.684 | GMFE=1.88 w2f=0.62 | beats paper |
+| VDss | MFMN_InteractAux | 177 | R²=0.648 MAE=0.247 GMFE=1.764 w2f=0.684 | R²=0.60 MAE=0.28 GMFE=1.88 w2f=0.62 | beats paper |
 | Fu | MFMN_DynGate + 1.25x low-fu weighting | 633 | R²=0.712 MAE=0.319 GMFE=2.086 w2f=0.613 | R²=0.69 MAE=0.30 GMFE=2.01 w2f=0.60 | beats paper on R²/w2f |
 
-("w2f" = within-2-fold.) The 10-seed ablations for all five targets are complete; see [`results_10seed/README.md`](results_10seed/README.md#ablation-10-seeds-complete) for results and caveats (five of the six pKa ablation variants are reconstructed and unverified). A Results-section draft is in `manuscript/`.
-Note: the notebooks in `notebooks/` still contain their earlier saved outputs, and notebooks 03 (CL) and 04 (VDss) still use `N_SEEDS = 5`; set it to 10 to reproduce the 10-seed numbers above, which supersede the saved outputs.
+("w2f" = within-2-fold.)
+
+## Repository layout
+
+| Path | Contents |
+|---|---|
+| `src/` | Model and feature code (flat package; see "Code layout" below). |
+| `data/` | Input descriptors, graphs, labels and official train/test splits. |
+| `notebooks/` | One notebook per target that trains the final model with 10 seeds and scores the official test split. |
+| `results/` | 10-seed predictions and metrics: final models, untuned baselines, ablation variants. |
+| `manuscript/` | Results-section draft (`Results_section_draft.docx`), its tables (`t_*.csv`) and figures (`fig*.png`), and the scripts that rebuild them. |
+| `Diagram/` | Architecture diagrams of GraphMPNN and MFMN. |
 
 ## Quick start
 
 ```bash
 pip install torch rdkit pandas numpy scikit-learn matplotlib jupyter nbformat pyarrow
 cd notebooks
-jupyter notebook   # notebooks already contain full output; re-run a cell/notebook to reproduce live
+jupyter notebook   # run a notebook top to bottom to train its final model (writes to ../outputs/)
+```
+
+Notebooks 01 and 05 contain their saved outputs; notebooks 02-04 were updated (pKa_Basic now trains the
+no-site-readout model; CL/VDss now use 10 seeds) and have no saved outputs until re-run. The reference 10-seed numbers
+are in `results/`.
+
+To rebuild the Results draft from `results/` (needs `python-docx` in addition to the packages above):
+
+```bash
+cd manuscript
+python analysis.py    # tables t_*.csv and fig_data.json (bootstrap CIs, B = 10,000)
+python figures.py     # fig1-fig4
+python build_docx.py  # Results_section_draft.docx
 ```
 
 Each notebook is standalone (adds `../src` to `sys.path` itself) and runs on GPU automatically
@@ -45,9 +68,9 @@ graph message-passing).
 This project found that the single best architecture differs by target — there is no one
 model that wins everywhere:
 - **pKa_Acidic / pKa_Basic**: `GraphMPNN`, a from-scratch edge-gated message-passing GNN
-  (for pKa_Basic the final model omits the ionizable-site readout, which scored best on every
-  metric in the 10-seed ablation; notebook 02 still trains the full model)
-  operating directly on molecular graphs (`src/graph_mpnn.py`, `src/graph_features.py`).
+  operating directly on molecular graphs (`src/graph_mpnn.py`, `src/graph_features.py`). For
+  pKa_Basic the final model omits the ionizable-site readout (`site_readout=False`), which
+  scored best on every metric in the 10-seed ablation.
 - **CL**: `MFMN_DynGate` — a factorized-descriptor model (7 mechanistic factors, each
   privileged to its own named descriptors) with per-compound input-conditioned gating and
   auxiliary supervision (`aux_weight=0.8`).
@@ -94,7 +117,7 @@ CV-confirmed (3-repeat, noise-exceeding) low-fu improvement at negligible overal
 locked-in one-shot official-test run **improved every single metric** over the unweighted
 baseline (R² 0.7113→0.7121, MAE 0.3204→0.3193, RMSE 0.4358→0.4352, GMFE 2.0913→2.0860,
 within-2-fold 0.6019→0.6130) — the only idea in this whole investigation whose CV signal
-actually held up on the real test set. Note: the 10-seed ablation (`results_10seed/`) reproduces these exact
+actually held up on the real test set. Note: the 10-seed ablation (`results/ablation/Fu/`) reproduces these exact
 numbers, but none of these differences is resolved by a paired bootstrap (all 95% CIs include zero),
 so the improvement is consistent in direction but within test-set uncertainty.
 
@@ -133,7 +156,8 @@ so the improvement is consistent in direction but within test-set uncertainty.
 
 `src/` is a flat package — every module sits at the same level and imports its siblings
 directly. Notable files:
-- `graph_mpnn.py`, `graph_features.py`, `acidic_site.py`, `basic_site.py` — the pKa GNN stack.
+- `graph_mpnn.py`, `graph_features.py`, `acidic_site.py`, `basic_site.py` — the pKa GNN stack
+  (`GraphMPNN(site_readout=False)` gives the pKa_Basic final model).
 - `mfmn.py` — trimmed to the 4 classes actually used here (`MFMN`, `MFMN_Interact`,
   `MFMN_InteractAux`, `MFMN_DynGate`) out of the full project's ~10 architecture variants.
 - `descriptor_features.py` — CL/VDss's feature pipeline (shared PCA'd context + 7 factor blocks).

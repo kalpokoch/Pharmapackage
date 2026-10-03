@@ -70,17 +70,23 @@ class GraphMPNN(nn.Module):
     own xTB charge) -- trained on EVERY atom, not just the site, so the model
     learns a generally-informative local representation, not one narrowly
     tuned to acidic sites only.
+
+    `site_readout`: if False, the readout is [mean-pool, max-pool] only (no
+    ionizable-site embedding); used for the final pKa_Basic model. The node-level
+    site flag in the input features is unaffected.
     """
 
     def __init__(self, node_dim, edge_dim, hidden_dim=128, n_layers=4, dropout=0.1,
-                 pretrain_heads=None, node_pretrain_dim=0):
+                 pretrain_heads=None, node_pretrain_dim=0, site_readout=True):
         super().__init__()
         self.input_proj = nn.Sequential(nn.Linear(node_dim, hidden_dim), nn.SiLU())
         self.layers = nn.ModuleList([MPNNLayer(hidden_dim, edge_dim) for _ in range(n_layers)])
         self.dropout = nn.Dropout(dropout)
         self.hidden_dim = hidden_dim
+        self.site_readout = site_readout
 
-        readout_dim = hidden_dim * 3  # site + mean-pool + max-pool
+        readout_dim = hidden_dim * (3 if site_readout else 2)  # [site +] mean-pool + max-pool
+        self.readout_dim = readout_dim
         self.readout_norm = nn.LayerNorm(readout_dim)
 
         self.pretrain_heads = nn.ModuleDict()
@@ -97,9 +103,8 @@ class GraphMPNN(nn.Module):
 
     def add_finetune_head(self, out_dim=1, hidden=None):
         hidden = hidden or self.hidden_dim
-        readout_dim = self.hidden_dim * 3
         self.finetune_head = nn.Sequential(
-            nn.Linear(readout_dim, hidden), nn.SiLU(), nn.Dropout(0.2), nn.Linear(hidden, out_dim))
+            nn.Linear(self.readout_dim, hidden), nn.SiLU(), nn.Dropout(0.2), nn.Linear(hidden, out_dim))
         return self
 
     def encode(self, nodes, adj_feats, adj_mask, node_mask, site_idx):
@@ -115,6 +120,9 @@ class GraphMPNN(nn.Module):
         h_masked_for_max = h.masked_fill(mask == 0, float("-inf"))
         max_pool, _ = h_masked_for_max.max(dim=1)
         max_pool = torch.where(torch.isfinite(max_pool), max_pool, torch.zeros_like(max_pool))
+
+        if not self.site_readout:
+            return h, self.readout_norm(torch.cat([mean_pool, max_pool], dim=-1))
 
         B, N, H = h.shape
         has_site = (site_idx >= 0)

@@ -1,0 +1,4 @@
+__pycache__/
+.ipynb_checkpoints/
+outputs/
+manuscript/fig_data.json
