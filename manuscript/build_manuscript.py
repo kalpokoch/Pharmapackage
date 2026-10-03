@@ -19,6 +19,7 @@ from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 
 import build_docx                                           # noqa: E402  (shared context builder)
@@ -147,6 +148,19 @@ def main():
          f"mechanistic or physiologically based model {cite('mavroudis2023', 'gruber2024', 'li2024')}. Both "
          f"strategies rest on the same foundation: the quality of the structure-derived parameter predictions that "
          f"enter them {cite('chou2023', 'geci2024')}.")
+    f_ctx = num.fig_label()
+    doc.add_picture(str(ROOT / "Diagram" / "From Structure to Smarter Decisions.png"), width=Inches(6.5))
+    doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    fig_caption(f"Fig. {f_ctx}. ", "Where structure-based parameter prediction sits in drug discovery. "
+                "(1) Experimental determination of pharmacokinetic parameters is accurate but slow, "
+                "resource-intensive and limited to one compound at a time. (2) Predicting the same parameters "
+                "from structure \u2014 clearance, volume of distribution, fraction unbound and the ionization "
+                "constants, which are the five endpoints modeled in this work \u2014 takes seconds per compound; "
+                "the exposure shown is that obtained by propagating predicted parameters through an assumed "
+                f"compartmental model (Section {docx_common.ROMAN[3]}-H), not a learned concentration\u2013time "
+                "profile. (3) The resulting throughput allows candidates to be ranked before synthesis, at the "
+                "stage where acting on an unfavourable profile is least costly. Computational screening narrows "
+                "what reaches the laboratory; it does not replace experimental confirmation.")
     para(f"Graph neural networks are now the dominant representation for molecular property prediction, learning "
          f"directly from the molecular graph rather than from precomputed descriptors "
          f"{cite('dgcl2024', 'chainaware2024')}, and have been applied to absorption, distribution, metabolism, "
