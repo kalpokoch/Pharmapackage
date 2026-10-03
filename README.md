@@ -32,7 +32,7 @@ are in [`results/`](results/README.md); the Results-section draft and the script
 | `src/` | Model and feature code (flat package; see "Code layout" below). |
 | `data/` | Input descriptors, graphs, labels and official train/test splits. |
 | `notebooks/` | One notebook per target that trains the final model with 10 seeds and scores the official test split. |
-| `results/` | 10-seed predictions and metrics: final models, untuned baselines, ablation variants. |
+| `results/` | 10-seed predictions and metrics: final models, untuned baselines, ablation variants, and the downstream exposure propagation ([`results/downstream/`](results/downstream/README.md)). |
 | `manuscript/` | Results-section draft (`Results_section_draft.docx`), its tables (`t_*.csv`) and figures (`fig*.png`), and the scripts that rebuild them. |
 | `Diagram/` | Architecture diagrams of GraphMPNN and MFMN. |
 
@@ -56,6 +56,17 @@ python analysis.py    # tables t_*.csv and fig_data.json (bootstrap CIs, B = 10,
 python figures.py     # fig1-fig4
 python build_docx.py  # Results_section_draft.docx
 ```
+
+## Downstream exposure propagation
+
+`results/downstream/` asks whether our improved CL and VDss predictions propagate into better *exposure* predictions.
+Holding a one-compartment IV exposure model fixed (dose linearity, 1 mg/kg), it compares AUC and Cmax computed from
+three parameter sources -- observed, Jia et al.'s QSAR predictions, and ours -- on the 106 compounds of the paper's
+test set. Run it with `python manuscript/downstream_analysis.py`; it downloads the paper's Supporting Information
+workbook into `data/external/` (CC BY-NC-ND, not redistributed here) and verifies its checksum.
+
+This measures how parameter error propagates into exposure error, not absolute concentration-profile accuracy; see
+[`results/downstream/README.md`](results/downstream/README.md) for what the numbers do and do not support.
 
 Each notebook is standalone (adds `../src` to `sys.path` itself) and runs on GPU automatically
 if available, falling back to CPU otherwise. Runtimes on a single modern GPU: pKa notebooks
