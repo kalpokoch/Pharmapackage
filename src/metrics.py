@@ -8,8 +8,12 @@ import numpy as np
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 
 PAPER = {
-    "CL": {"GMFE": 2.00, "within_2fold": 0.64},
-    "VDss": {"GMFE": 1.88, "within_2fold": 0.62},
+    # CL/VDss R2, MAE, RMSE corrected 2026-09-30 against the primary source (Table 2, p.7740):
+    # the paper reports the full metric set for every target -- these two were previously
+    # missing R2/MAE/RMSE here (GMFE/within_2fold-only), an incomplete transcription, not a
+    # gap in what the paper itself reports.
+    "CL": {"R2": 0.48, "MAE": 0.31, "RMSE": 0.42, "GMFE": 2.00, "within_2fold": 0.64},
+    "VDss": {"R2": 0.60, "MAE": 0.28, "RMSE": 0.35, "GMFE": 1.88, "within_2fold": 0.62},
     "Fu": {"R2": 0.69, "MAE": 0.30, "RMSE": 0.41, "GMFE": 2.01, "within_2fold": 0.60},
     "pKa_Acidic": {"R2": 0.94, "MAE": 0.61, "RMSE": 1.05, "GMFE": 1.10, "within_2fold": 0.98},
     "pKa_Basic": {"R2": 0.91, "MAE": 0.67, "RMSE": 0.98, "GMFE": 1.28, "within_2fold": 0.91},

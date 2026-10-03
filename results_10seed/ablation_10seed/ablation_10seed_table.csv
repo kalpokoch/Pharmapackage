@@ -1,18 +1,18 @@
 target,variant,name,status,n_seeds,R2_mean_pm_sd,MAE_mean_pm_sd,RMSE_mean_pm_sd,R2_ens,MAE_ens,diff_mean_R2,diff_in_final_sd_R2,flag_R2,diff_mean_MAE,diff_in_final_sd_MAE,flag_MAE
-CL,mfmn_base,MFMN (base),RUN,10,0.364 ± 0.076,0.348 ± 0.022,0.463 ± 0.027,0.4677,0.3133,-0.0762,-3.82,overlaps_zero,0.0237,3.21,overlaps_zero
-CL,interactaux,MFMN_InteractAux,RUN,10,0.426 ± 0.036,0.329 ± 0.013,0.440 ± 0.014,0.4897,0.3088,-0.0148,-0.74,overlaps_zero,0.0053,0.72,overlaps_zero
+CL,mfmn_base,MFMN (base),RUN,10,0.364 ± 0.076,0.348 ± 0.022,0.463 ± 0.027,0.4677,0.3133,-0.0761,-3.83,overlaps_zero,0.0237,3.21,overlaps_zero
+CL,interactaux,MFMN_InteractAux,RUN,10,0.426 ± 0.036,0.329 ± 0.013,0.440 ± 0.014,0.4897,0.3088,-0.0148,-0.74,overlaps_zero,0.0053,0.71,overlaps_zero
 CL,final,FINAL,final,10,0.441 ± 0.020,0.324 ± 0.007,0.435 ± 0.008,0.4967,0.305,,,reference,,,reference
 VDss,mfmn_base,MFMN (base),RUN,10,0.528 ± 0.029,0.287 ± 0.009,0.379 ± 0.012,0.5713,0.2724,-0.0803,-2.78,excludes_zero,0.028,2.41,excludes_zero
 VDss,dyngate,MFMN_DynGate,RUN,10,0.609 ± 0.009,0.260 ± 0.004,0.346 ± 0.004,0.6465,0.2482,0.0002,0.01,overlaps_zero,0.0018,0.15,overlaps_zero
 VDss,final,FINAL,final,10,0.609 ± 0.029,0.259 ± 0.012,0.345 ± 0.013,0.6478,0.2466,,,reference,,,reference
-Fu,dyngate_unweighted,MFMN_DynGate (unweighted),not run (BLOCKED),0,,,,,,,,,,,
-Fu,mfmn_base_untuned,MFMN base (untuned),not run (BLOCKED),0,,,,,,,,,,,
-Fu,final,FINAL,final,10,0.683 ± 0.012,0.335 ± 0.007,0.457 ± 0.009,0.7143,0.3185,,,reference,,,reference
-pKa_Acidic,no_xtb,"GraphMPNN, no xTB features",not run (BLOCKED),0,,,,,,,,,,,
-pKa_Acidic,no_edge_gating,"GraphMPNN, no edge gating",not run (BLOCKED),0,,,,,,,,,,,
-pKa_Acidic,no_site_readout,"GraphMPNN, no site readout",not run (BLOCKED),0,,,,,,,,,,,
-pKa_Acidic,final,FINAL,final,10,0.965 ± 0.002,0.473 ± 0.011,0.805 ± 0.021,0.9695,0.4197,,,reference,,,reference
-pKa_Basic,no_xtb,"GraphMPNN, no xTB features",not run (BLOCKED),0,,,,,,,,,,,
-pKa_Basic,no_edge_gating,"GraphMPNN, no edge gating",not run (BLOCKED),0,,,,,,,,,,,
-pKa_Basic,no_site_readout,"GraphMPNN, no site readout",not run (BLOCKED),0,,,,,,,,,,,
-pKa_Basic,final,FINAL,final,10,0.935 ± 0.004,0.476 ± 0.018,0.747 ± 0.023,0.9463,0.4185,,,reference,,,reference
+Fu,dyngate_unweighted,MFMN_DynGate (unweighted),RUN_WITH_CAVEAT,10,0.680 ± 0.009,0.337 ± 0.007,0.459 ± 0.007,0.7113,0.3204,-0.0009,-0.1,overlaps_zero,0.0,0.01,overlaps_zero
+Fu,mfmn_base_untuned,MFMN base (untuned),RUN_WITH_CAVEAT,10,0.631 ± 0.003,0.361 ± 0.004,0.493 ± 0.002,0.6728,0.3408,-0.05,-5.85,excludes_zero,0.0244,4.28,excludes_zero
+Fu,final,FINAL,final,10,0.681 ± 0.009,0.337 ± 0.006,0.458 ± 0.006,0.7121,0.3193,,,reference,,,reference
+pKa_Acidic,no_xtb,"GraphMPNN, no xTB features",RECONSTRUCTED_VERIFIED,10,0.963 ± 0.002,0.488 ± 0.017,0.822 ± 0.021,0.9687,0.4256,-0.0002,-0.1,overlaps_zero,0.0043,0.22,overlaps_zero
+pKa_Acidic,no_edge_gating,"GraphMPNN, no edge gating",RECONSTRUCTED_UNVERIFIED,10,0.964 ± 0.002,0.484 ± 0.017,0.814 ± 0.027,0.9691,0.4277,0.0005,0.25,overlaps_zero,0.0003,0.01,overlaps_zero
+pKa_Acidic,no_site_readout,"GraphMPNN, no site readout",RECONSTRUCTED_UNVERIFIED,10,0.963 ± 0.002,0.486 ± 0.017,0.830 ± 0.025,0.9677,0.4269,-0.0009,-0.42,overlaps_zero,0.0026,0.13,overlaps_zero
+pKa_Acidic,final,FINAL,final,10,0.963 ± 0.002,0.484 ± 0.020,0.820 ± 0.025,0.9689,0.4241,,,reference,,,reference
+pKa_Basic,no_xtb,"GraphMPNN, no xTB features",RECONSTRUCTED_UNVERIFIED,10,0.931 ± 0.004,0.483 ± 0.014,0.772 ± 0.024,0.9427,0.4238,-0.0064,-2.4,excludes_zero,0.0109,1.04,overlaps_zero
+pKa_Basic,no_edge_gating,"GraphMPNN, no edge gating",RECONSTRUCTED_UNVERIFIED,10,0.935 ± 0.004,0.469 ± 0.015,0.747 ± 0.023,0.9463,0.4147,-0.002,-0.75,overlaps_zero,-0.0027,-0.26,overlaps_zero
+pKa_Basic,no_site_readout,"GraphMPNN, no site readout",RECONSTRUCTED_UNVERIFIED,10,0.940 ± 0.002,0.461 ± 0.016,0.720 ± 0.013,0.9504,0.406,0.0028,1.04,overlaps_zero,-0.0116,-1.1,excludes_zero
+pKa_Basic,final,FINAL,final,10,0.937 ± 0.003,0.472 ± 0.010,0.736 ± 0.016,0.9478,0.4162,,,reference,,,reference

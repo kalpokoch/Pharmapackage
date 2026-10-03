@@ -17,8 +17,8 @@ Full per-metric tables (seed mean/sd/min/max and paper values): `finals/<target>
 
 ## Contents
 - `finals/` - retrained final models: per-target summaries, per-seed metrics, ensemble predictions, summary figures, `manifest.json`.
-- `baselines/` - untuned Random Forest / XGBoost / SVM vs the proposed models (CL, VDss, Fu; same test rows). See `baselines/README.md`.
-- `ablation_10seed/` - 10-seed ablation tables and `report.md` (see status below).
+- `baselines/` - untuned Random Forest / XGBoost / SVM vs the proposed models (all five targets; same test rows). See `baselines/README.md`.
+- `ablation_10seed/` - 10-seed ablation tables, `report.md` and `checks.json` (all 12 variants; see below).
 - `scripts/` - the scripts that produced these results (`run_finals.py`, `run_baselines_10seed.py`, `run_ablation_10seed.py`,
   `analyze_ablation_10seed.py`, `run_pipeline_rest.sh`). They assume the full project layout and are included for provenance,
   not as standalone runnable code.
@@ -26,29 +26,61 @@ Full per-metric tables (seed mean/sd/min/max and paper values): `finals/<target>
 ## Baselines vs proposed (10-seed ensemble, official test)
 | Target | Proposed | Random Forest | XGBoost | SVM |
 |---|---|---|---|---|
+| pKa_Acidic (R2 / MAE) | **0.969 / 0.424** | 0.927 / 0.699 | 0.919 / 0.743 | 0.770 / 1.475 |
+| pKa_Basic (R2 / MAE) | **0.948 / 0.416** | 0.862 / 0.758 | 0.881 / 0.701 | 0.723 / 1.068 |
 | CL (GMFE / w2f) | 2.018 / 0.605 | **2.010 / 0.638** | 2.266 / 0.497 | 2.042 / 0.627 |
 | VDss (GMFE / w2f) | **1.764 / 0.684** | 1.848 / 0.661 | 2.026 / 0.588 | 1.919 / 0.610 |
 | Fu (GMFE / w2f) | **2.086 / 0.613** | 2.391 / 0.488 | 2.316 / 0.531 | 2.284 / 0.534 |
 
 On **CL**, the untuned Random Forest is on par with or ahead of the proposed model on GMFE and within-2-fold; the proposed model
-leads on VDss and Fu. Paired-bootstrap confidence intervals are in `baselines/tables/baseline_vs_proposed_bootstrap.csv`.
+leads on both pKa targets, VDss and Fu. Paired-bootstrap confidence intervals are in `baselines/tables/baseline_vs_proposed_bootstrap.csv`.
 
-## Ablation status (partial)
-Completed (10 seeds, passed the seed-42 reproduction check): **CL** (MFMN base, InteractAux) and **VDss** (MFMN base, DynGate).
+## Ablation (10 seeds, complete)
+All 12 variants were run with 10 seeds (42-51) on the official test split; `ablation_10seed/checks.json` reports all consistency
+checks passed (test labels identical to the final model's, seed/row mapping consistent, metrics recomputed). "Resolved" below means
+the 95% CI of the ensemble difference (compound-level paired bootstrap, B = 10,000) excludes zero.
 
-| Target | Variant | R2 (ens) | GMFE (ens) | within-2-fold (ens) |
-|---|---|---|---|---|
-| CL | final (DynGate) | 0.497 | 2.019 | 0.605 |
-| CL | MFMN base | 0.468 | 2.057 | 0.571 |
-| CL | InteractAux | 0.490 | 2.036 | 0.605 |
-| VDss | final (InteractAux) | 0.648 | 1.764 | 0.684 |
-| VDss | MFMN base | 0.571 | 1.872 | 0.655 |
-| VDss | DynGate | 0.647 | 1.771 | 0.695 |
+| Target | Variant | Status | R2 (ens) | MAE (ens) | GMFE (ens) | within-2-fold (ens) |
+|---|---|---|---|---|---|---|
+| CL | final (DynGate) | | 0.497 | 0.305 | 2.018 | 0.605 |
+| CL | MFMN base | verified | 0.468 | 0.313 | 2.057 | 0.571 |
+| CL | InteractAux | verified | 0.490 | 0.309 | 2.036 | 0.605 |
+| VDss | final (InteractAux) | | 0.648 | 0.247 | 1.764 | 0.684 |
+| VDss | MFMN base | verified | 0.571 | 0.272 | 1.872 | 0.655 |
+| VDss | DynGate | verified | 0.647 | 0.248 | 1.771 | 0.695 |
+| Fu | final (DynGate + 1.25x low-fu weight) | | 0.712 | 0.319 | 2.086 | 0.613 |
+| Fu | DynGate, unweighted | caveat (1) | 0.711 | 0.320 | 2.091 | 0.602 |
+| Fu | "MFMN base (untuned)" | caveat (2) | 0.673 | 0.341 | - | - |
 
-**Not included yet:**
-- **Fu** ablation variants - blocked: the seed-42 smoke test did not reproduce the stored numbers within tolerance.
-- **pKa** ablations (no xTB / no edge gating / no site readout) - the original code for these rows is not in the project, so the
-  variants were reconstructed and are unverified; the 10-seed runs are still in progress. They will be added when complete.
+| Target | Variant | Status | R2 (ens) | MAE (ens) | RMSE (ens) |
+|---|---|---|---|---|---|
+| pKa_Acidic | final (GraphMPNN) | | 0.969 | 0.424 | 0.757 |
+| pKa_Acidic | no xTB features | reconstructed, verified | 0.969 | 0.426 | 0.759 |
+| pKa_Acidic | no edge gating | reconstructed, unverified | 0.969 | 0.428 | 0.754 |
+| pKa_Acidic | no site readout | reconstructed, unverified | 0.968 | 0.427 | 0.771 |
+| pKa_Basic | final (GraphMPNN) | | 0.948 | 0.416 | 0.670 |
+| pKa_Basic | no xTB features | reconstructed, unverified | 0.943 | 0.424 | 0.703 |
+| pKa_Basic | no edge gating | reconstructed, unverified | 0.946 | 0.415 | 0.680 |
+| pKa_Basic | no site readout | reconstructed, unverified | 0.950 | 0.406 | 0.654 |
 
-The ablation tables in `ablation_10seed/` were generated before the final retraining and compare against the previously stored
-final models; the retrained finals agree with those to within ~1e-4 on CL/VDss (see `finals/retrained_vs_stored.csv`).
+Findings:
+- **CL**: the final model has the best ensemble value on R2/MAE/RMSE/GMFE, but no difference from either variant is resolved.
+- **VDss**: the final model beats MFMN base (R2, MAE, RMSE, GMFE resolved); final vs DynGate is not resolved on any metric.
+- **Fu**: removing the 1.25x low-fu loss weight changes nothing that is resolved (final is better on every point estimate, by less
+  than one seed SD). The "MFMN base (untuned)" row is clearly worse but is not a clean ablation (see caveat 2).
+- **pKa_Acidic**: no ablation has a resolved effect; every metric is within 0.014 of the final model.
+- **pKa_Basic**: removing xTB features degrades R2 and RMSE (resolved). Removing edge gating has no resolved effect. Removing the
+  site readout gives the *better* point estimate on every metric (not resolved; MAE CI borderline), so the site readout is not
+  supported as a contributing component on this test set.
+
+Caveats:
+- **Reconstructed pKa variants**: the original code for the pKa ablation rows is not in the project, so the variants were
+  reconstructed from their names. "Verified" = seed 42 reproduces the stored single-seed result within |dR2|, |dMAE| <= 0.002; only
+  pKa_Acidic "no xTB features" passes. The other five may not be the same models as the original ablation.
+- (1) Fu unweighted: the seed-42 reproduction check failed for every candidate code path (attributed to environment drift); run
+  anyway. Its numbers match the unweighted model quoted in the main README.
+- (2) Fu "MFMN base (untuned)": the code attributed to this label trains MFMN_InteractAux (aux_weight 0.3), not a plain MFMN, and
+  does not reproduce the stored row. Not used in the manuscript.
+
+The CL/VDss/Fu ablation runs date from 2026-10-01 and the pKa runs completed 2026-10-02; all were compared against the retrained
+finals in `finals/` (`report.md`, sections 5-6).
