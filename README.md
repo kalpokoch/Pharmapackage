@@ -12,19 +12,19 @@ using a multi-seed ensemble, matching the actual final-confirmation scripts this
 ## Results (10-seed retrained, official test split)
 
 All five proposed models were retrained with 10 seeds (42-51) and scored on the official held-out test split
-(ensemble of the 10 seeds). Full tables, per-seed metrics, figures, untuned baselines and the CL/VDss ablation are in
+(ensemble of the 10 seeds). Full tables, per-seed metrics, figures, untuned baselines and the 10-seed ablation of all five targets are in
 [`results_10seed/`](results_10seed/README.md).
 
 | Target | Architecture | n_test | Our result | Paper | Verdict |
 |---|---|---|---|---|---|
 | pKa_Acidic | GraphMPNN | 776 | R²=0.969 MAE=0.424 | R²=0.94 MAE=0.61 | beats paper |
 | pKa_Basic | GraphMPNN | 815 | R²=0.948 MAE=0.416 | R²=0.91 MAE=0.67 | beats paper |
-| CL | MFMN_DynGate | 177 | GMFE=2.018 w2f=0.605 | GMFE=2.00 w2f=0.64 | narrowly trails paper |
+| CL | MFMN_DynGate | 177 | R²=0.497 MAE=0.305 GMFE=2.018 w2f=0.605 | R²=0.48 MAE=0.31 GMFE=2.00 w2f=0.64 | beats paper on R²/MAE/RMSE; narrowly trails on GMFE/w2f |
 | VDss | MFMN_InteractAux | 177 | GMFE=1.764 w2f=0.684 | GMFE=1.88 w2f=0.62 | beats paper |
 | Fu | MFMN_DynGate + 1.25x low-fu weighting | 633 | R²=0.712 MAE=0.319 GMFE=2.086 w2f=0.613 | R²=0.69 MAE=0.30 GMFE=2.01 w2f=0.60 | beats paper on R²/w2f |
 
-("w2f" = within-2-fold.) The Fu and pKa ablations are not yet included (Fu variants blocked; pKa runs in progress).
-Note: the notebooks in `notebooks/` still contain their earlier saved outputs (5-seed for CL/VDss); the numbers above supersede them.
+("w2f" = within-2-fold.) The 10-seed ablations for all five targets are complete; see [`results_10seed/README.md`](results_10seed/README.md#ablation-10-seeds-complete) for results and caveats (five of the six pKa ablation variants are reconstructed and unverified). A Results-section draft is in `manuscript/`.
+Note: the notebooks in `notebooks/` still contain their earlier saved outputs, and notebooks 03 (CL) and 04 (VDss) still use `N_SEEDS = 5`; set it to 10 to reproduce the 10-seed numbers above, which supersede the saved outputs.
 
 ## Quick start
 
@@ -58,8 +58,8 @@ model that wins everywhere:
   for the bottom ~10% of compounds by fu (see the post-delivery investigation below — this was
   added after the original delivery and is a confirmed, official-test-verified improvement).
 
-See `mfmn/deliverables/PROJECT_REPORT.md` in the parent project for the full experimental
-history behind why each of these specific recipes won.
+The full experimental history behind why each of these specific recipes won is in
+`mfmn/deliverables/PROJECT_REPORT.md` in the parent project (not included in this repository).
 
 ## Data
 
@@ -92,7 +92,9 @@ CV-confirmed (3-repeat, noise-exceeding) low-fu improvement at negligible overal
 locked-in one-shot official-test run **improved every single metric** over the unweighted
 baseline (R² 0.7113→0.7121, MAE 0.3204→0.3193, RMSE 0.4358→0.4352, GMFE 2.0913→2.0860,
 within-2-fold 0.6019→0.6130) — the only idea in this whole investigation whose CV signal
-actually held up on the real test set.
+actually held up on the real test set. Note: the 10-seed ablation (`results_10seed/`) reproduces these exact
+numbers, but none of these differences is resolved by a paired bootstrap (all 95% CIs include zero),
+so the improvement is consistent in direction but within test-set uncertainty.
 
 **Rejected:**
 1. **Logit-transform the target** — motivated by the same low-fu shrinkage pattern (textbook
