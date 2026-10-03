@@ -33,7 +33,7 @@ are in [`results/`](results/README.md); the Results-section draft and the script
 | `data/` | Input descriptors, graphs, labels and official train/test splits. |
 | `notebooks/` | One notebook per target that trains the final model with 10 seeds and scores the official test split. |
 | `results/` | 10-seed predictions and metrics: final models, untuned baselines, ablation variants, the paired comparison with the benchmark's own predictions ([`results/paired_vs_jia/`](results/paired_vs_jia/README.md)) and the downstream exposure propagation ([`results/downstream/`](results/downstream/README.md)). |
-| `manuscript/` | Results-section draft (`Results_section_draft.docx`), its tables (`t_*.csv`) and figures (`fig*.png`), and the scripts that rebuild them. |
+| `manuscript/` | The manuscript (`Manuscript_draft.docx`) and the Results-only draft, their tables (`t_*.csv`) and figures (`fig*.png`), and the scripts that rebuild them. |
 | `Diagram/` | Architecture diagrams of GraphMPNN and MFMN. |
 
 ## Quick start
@@ -53,10 +53,18 @@ To rebuild the Results draft from `results/` (needs `python-docx` in addition to
 ```bash
 cd manuscript
 python analysis.py    # tables t_*.csv and fig_data.json (bootstrap CIs, B = 10,000)
-python figures.py          # fig1, fig2, fig4, fig5
-python paired_vs_jia.py    # t_paired_vs_jia.csv, fig3 (needs the SI workbook; downloaded on first run)
-python build_docx.py       # Results_section_draft.docx
+python figures.py          # the Results figures
+python paired_vs_jia.py    # t_paired_vs_jia.csv (needs the SI workbook; downloaded on first run)
+python downstream_analysis.py  # t_downstream.csv and results/downstream/
+python build_manuscript.py # Manuscript_draft.docx  <- the full paper
+python build_docx.py       # Results_section_draft.docx (the Results part on its own)
 ```
+
+`build_manuscript.py` writes the front matter (title, abstract, introduction, datasets, methodology with
+equations) and then calls `sections_results.py`, which holds the Results, Discussion and Conclusion text shared
+with `build_docx.py`, so the two documents cannot drift apart. Table, figure, equation and citation numbers are
+assigned automatically (`docx_common.py`); references live in `references.py`, each one verified against its
+CrossRef record. Architecture diagrams are intentionally left as placeholders.
 
 ## Paired comparison with the benchmark's own predictions
 
