@@ -11,6 +11,8 @@ Architecture figures are deliberately left as placeholders.
 import sys
 from pathlib import Path
 
+import pandas as pd
+
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -30,6 +32,8 @@ TITLE_ALTS = [
     "Seed-Resolved Benchmarking of Graph and Descriptor Neural Networks for Human PK and pKa Prediction",
     "From Structure to Exposure: Graph Neural Networks for pKa and Pharmacokinetic Parameter Prediction",
 ]
+TITLE_EP = {"pKa_Acidic": "pKa (acidic)", "pKa_Basic": "pKa (basic)", "CL": "CL",
+            "VDss": "VDss", "Fu": "Fu"}
 KEYWORDS = ("Pharmacokinetics, graph neural networks, molecular property prediction, "
             "acid dissociation constant, drug clearance, volume of distribution, model ensembling, "
             "reproducible benchmarking")
@@ -318,6 +322,10 @@ def main():
          "standardized using training-fold statistics and predictions are inverted before scoring. The reported "
          "prediction for each compound is the arithmetic mean of the ten seeds' predictions. Training "
          "configurations are given in Table " + num.peek_tables(1)[0] + ".")
+    para("All training and evaluation was performed on an NVIDIA DGX A100 server. Each run was allocated a single "
+         "A100-SXM4-40GB GPU partitioned by Multi-Instance GPU into a 3g.20gb slice, so no run had exclusive use "
+         "of a whole device. Runs are made deterministic within a slice by fixing the Python, NumPy and PyTorch "
+         "seeds, restricting intra-op threading, and enabling deterministic cuDNN kernels.")
     t_hp = num.table_label()
     caption(f"Table {t_hp}\n", "Training configuration for the two model families")
     rows = [
@@ -344,7 +352,49 @@ def main():
                  "to the full readout and to the variant without the site term; the range for the pharmacokinetic "
                  "models spans the CL/VDss and Fu feature configurations."])
 
-    doc.add_heading("F. Evaluation Metrics and Statistics", level=2)
+    doc.add_heading("F. Model Complexity and Computational Cost", level=2)
+    cx = pd.read_csv(HERE / "t_complexity.csv").set_index("target")
+    gnn, vd = cx.loc["pKa_Acidic"], cx.loc["VDss"]
+    ratio = gnn.flops_median_mol / vd.flops_median_mol
+    t_cx = num.table_label()
+    para(f"The two families differ in cost by three orders of magnitude, which is worth stating because it bears "
+         f"on where each is worth deploying. Table {t_cx} reports trainable parameters, forward floating-point "
+         f"operations for a single molecule, and the measured wall-clock training time per seed. The graph model "
+         f"carries {gnn.params:,} parameters and costs {gnn.flops_median_mol/1e6:.0f} MFLOPs for a molecule of "
+         f"median size ({int(gnn.n_atoms_median)} heavy atoms), rising to "
+         f"{gnn.flops_max_mol/1e6:.0f} MFLOPs for the largest compound in the pool "
+         f"({int(gnn.n_atoms_max)} heavy atoms): the dense adjacency representation evaluates the bond-conditioned "
+         f"gate of (2) for every ordered atom pair, so cost grows quadratically with molecule size. The "
+         f"descriptor models are fixed-cost regardless of molecule size and range from "
+         f"{cx.flops_median_mol.min()/1e3:.0f} to {cx.loc['Fu'].flops_median_mol/1e3:.0f} kFLOPs, roughly "
+         f"{ratio:,.0f}-fold cheaper than the graph model at the low end.")
+    para(f"The same contrast appears in training time: a single pKa seed takes about "
+         f"{gnn.sec_per_seed_mean/60:.0f} minutes against under a minute for each pharmacokinetic endpoint, so a "
+         f"ten-seed pKa ensemble costs roughly {10*gnn.sec_per_seed_mean/3600:.1f} GPU-hours against about "
+         f"{10*vd.sec_per_seed_mean/60:.0f} minutes. These are measured wall-clock times with several seeds "
+         f"training concurrently on the same GPU slice, so they include contention and are upper bounds on the "
+         f"cost of a dedicated run. Floating-point counts cover the matrix multiplications of a forward pass and "
+         f"exclude feature generation, which for both families is dominated by descriptor and semi-empirical "
+         f"calculation performed once per compound. The classical baselines of Section "
+         f"{docx_common.ROMAN[4]}-D are non-parametric and are not characterised by these measures.")
+    caption(f"Table {t_cx}\n", "Model complexity and measured training cost")
+    rows = []
+    for t in ["pKa_Acidic", "pKa_Basic", "CL", "VDss", "Fu"]:
+        r = cx.loc[t]
+        fl = (f"{r.flops_median_mol/1e6:.0f} / {r.flops_max_mol/1e6:.0f} M" if r.family == "graph"
+              else f"{r.flops_median_mol/1e3:.0f} k")
+        rows.append([TITLE_EP[t], r.model, f"{int(r.params):,}", fl,
+                     f"{r.sec_per_seed_mean:.0f}", f"{r.sec_per_seed_min:.0f}\u2013{r.sec_per_seed_max:.0f}"])
+    table(["Endpoint", "Model", "Parameters", "Forward FLOPs/molecule", "s / seed", "range"],
+          rows, [0.95, 1.6, 0.95, 1.5, 0.7, 0.8],
+          notes=["Trainable parameters. Forward FLOPs are for one molecule, counted by the PyTorch profiler over "
+                 "the matrix multiplications of a forward pass; for the graph model the two values are for a "
+                 "median-sized and the largest molecule in the pool (26 and 65 heavy atoms), between which cost "
+                 "grows quadratically, while the descriptor models are size-independent. Training time is measured "
+                 "wall-clock per seed on one A100-SXM4-40GB MIG 3g.20gb slice of an NVIDIA DGX A100, with several "
+                 "seeds running concurrently on the slice; it therefore includes contention."])
+
+    doc.add_heading("G. Evaluation Metrics and Statistics", level=2)
     para("Predictions are scored by the coefficient of determination, mean absolute error and root mean squared "
          "error. For the endpoints modeled in log₁₀ space, two fold-error metrics are reported after "
          "back-transformation: the geometric mean fold error and the fraction of compounds predicted within n-fold "
@@ -358,7 +408,7 @@ def main():
          "bootstrap in which both are evaluated on the same resampled compounds, and a difference is reported as "
          "resolved only when the 95% interval of the paired difference excludes zero.")
 
-    doc.add_heading("G. Propagation to Exposure", level=2)
+    doc.add_heading("H. Propagation to Exposure", level=2)
     para("To ask whether improved parameter predictions yield better predicted exposure, the predicted CL and VDss "
          "are propagated through a fixed one-compartment intravenous model under the dose-linearity assumption and "
          "1 mg/kg normalization used throughout the benchmark. For a dose D, infusion duration T and elimination "

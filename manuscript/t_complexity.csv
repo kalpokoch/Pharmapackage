@@ -1,0 +1,6 @@
+target,model,family,params,flops_median_mol,flops_max_mol,n_atoms_median,n_atoms_max,sec_per_seed_mean,sec_per_seed_min,sec_per_seed_max
+pKa_Acidic,GraphMPNN,graph,587905,119071488,653160576,26.0,65.0,1169.62,638.9,1595.7
+pKa_Basic,GraphMPNN (no site readout),graph,571265,119038592,653127680,26.0,65.0,1147.7199999999998,812.3,1595.9
+CL,MFMN-DynGate,descriptor,24328,48336,48336,,,50.8,39.8,72.0
+VDss,MFMN-InteractAux,descriptor,12976,25576,25576,,,46.66,36.6,57.4
+Fu,MFMN-DynGate,descriptor,161400,322480,322480,,,50.74,38.5,72.5

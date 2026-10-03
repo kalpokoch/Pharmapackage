@@ -56,6 +56,7 @@ python analysis.py    # tables t_*.csv and fig_data.json (bootstrap CIs, B = 10,
 python figures.py          # the Results figures
 python paired_vs_jia.py    # t_paired_vs_jia.csv (needs the SI workbook; downloaded on first run)
 python downstream_analysis.py  # t_downstream.csv and results/downstream/
+python complexity.py       # t_complexity.csv (needs torch + rdkit; GPU not required)
 python build_manuscript.py # Manuscript_draft.docx  <- the full paper
 python build_docx.py       # Results_section_draft.docx (the Results part on its own)
 ```
