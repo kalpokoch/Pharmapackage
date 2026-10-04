@@ -119,12 +119,16 @@ def main():
          f"distributes, and how much of it circulates unbound — determines whether a compound with promising "
          f"potency can become a viable drug. Measuring these properties in humans is slow and expensive, so "
          f"predicting them from chemical structure has become a standard part of early discovery "
-         f"{cite('bassani2024', 'seal2025')}. Recent work has moved from predicting isolated parameters towards "
+         f"{cite('bassani2024', 'seal2025')}, with dedicated efforts for clearance {cite('clearanceml2025')} and "
+         f"for the unbound fraction {cite('fubreview2026')}. Recent work has moved from predicting isolated "
+         f"parameters towards "
          f"predicting the full concentration–time profile, either by learning it directly "
          f"{cite('beckers2024', 'pillai2024')} or by feeding predicted physicochemical parameters into a "
          f"mechanistic or physiologically based model {cite('mavroudis2023', 'gruber2024', 'li2024')}. Both "
          f"strategies rest on the same foundation: the quality of the structure-derived parameter predictions that "
-         f"enter them {cite('chou2023', 'geci2024')}.")
+         f"enter them {cite('chou2023', 'geci2024')}. The same parameters feed exposure assessment for "
+         f"environmental chemicals {cite('pkexposure2024')} and the quantitative prediction of drug-drug "
+         f"interactions {cite('ddi2026')}, so errors in them propagate widely.")
     f_ctx = num.fig_label()
     doc.add_picture(str(ROOT / "Diagram" / "motivation_figure_drawio.drawio.png"), width=Inches(6.5))
     doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
@@ -147,15 +151,20 @@ def main():
          f"information affordable at screening scale {cite('xtbcorr2023')}. For acid dissociation constants in "
          f"particular — a property that governs ionization state and therefore permeability, binding and "
          f"clearance — graph-based and transfer-learning approaches have become the methods of choice "
-         f"{cite('qiu2024', 'pkareview2026')}.")
+         f"{cite('qiu2024', 'pkareview2026')}. Self-supervised pretraining on large unlabeled collections "
+         f"{cite('hierssl2023')} and geometry-aware transformer encoders {cite('geot2023')} have pushed accuracy "
+         f"further still, and self-interpretable graph architectures are beginning to make such predictions "
+         f"auditable rather than opaque {cite('xaignn2024')}.")
     para(f"Two difficulties complicate the interpretation of reported gains. First, published comparisons usually "
          f"report a single aggregate value per metric, so a reader cannot tell whether an improvement is larger "
          f"than the uncertainty of the test set, and a paired statistical test against the prior model is "
          f"generally impossible. Second, neural network results vary with the random seed, and comparisons between "
          f"a new architecture and its ablations are frequently reported from a single training run; the ensembling "
          f"and uncertainty literature has repeatedly shown this variation to be substantial "
-         f"{cite('ensembles2023')}. Together these make it difficult to reproduce and to trust incremental "
-         f"improvements, a concern that extends across cheminformatics more broadly {cite('repro2023')}.")
+         f"{cite('ensembles2023')}, and work on uncertainty quantification for molecular property models has argued "
+         f"that an estimate is of limited use without a statement of its reliability {cite('uqexplain2023')}. "
+         f"Together these make it difficult to reproduce and to trust incremental improvements, a concern that "
+         f"extends across cheminformatics more broadly {cite('repro2023')}.")
     para(f"This work addresses the parameter-prediction stage of the intravenous pharmacokinetics benchmark of "
          f"Jia et al. {cite('jia2025')}, which reports five structure-derived endpoints and then uses them to "
          f"predict concentration–time profiles. We retain that benchmark's official training and test splits "
@@ -189,7 +198,10 @@ def main():
          f"experimental pKa values from public compilations and chemical databases {cite('pubchem2023', 'chembl2024')}. "
          f"Retaining the published partition unchanged is what makes the comparison in Section "
          f"{docx_common.ROMAN[4]} meaningful: no compound in any test split was seen during training by either the "
-         f"benchmark models or ours.")
+         f"benchmark models or ours. Reference values of this kind are aggregated from heterogeneous sources and "
+         f"the curation decisions behind them measurably affect the models trained on them "
+         f"{cite('curation2024')}; the unbound fraction and intrinsic clearance in particular are assay-dependent "
+         f"quantities whose reported values carry appreciable experimental spread {cite('intrinsiccl2025')}.")
     t_data = num.table_label()
     caption(f"Table {t_data}\n", "Modeling sets and target distributions for the five endpoints")
     rows = [

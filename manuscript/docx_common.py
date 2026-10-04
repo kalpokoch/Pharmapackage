@@ -150,10 +150,27 @@ def make_builder():
 
 
     def table(header, rows, widths, notes=None, bold_cells=None, group_rows=None):
-        """IEEE-style three-rule table. rows: list of lists of str. bold_cells: set of (r, c)."""
+        """IEEE-style three-rule table. rows: list of lists of str. bold_cells: set of (r, c).
+
+        `widths` are relative: they are rescaled so the table spans the full text width,
+        which keeps the author's column proportions while filling the page."""
+        sec = doc.sections[0]
+        avail = (sec.page_width - sec.left_margin - sec.right_margin) / 914400
+        if widths and sum(widths) > 0:
+            k = avail / sum(widths)
+            widths = [w * k for w in widths]
         t = doc.add_table(rows=1 + len(rows), cols=len(header))
         t.alignment = WD_TABLE_ALIGNMENT.CENTER
         t.autofit = False
+        # fixed layout, so Word honours the column widths instead of re-fitting to content
+        tblPr = t._tbl.tblPr
+        layout = OxmlElement("w:tblLayout")
+        layout.set(qn("w:type"), "fixed")
+        tblPr.append(layout)
+        tw = OxmlElement("w:tblW")
+        tw.set(qn("w:w"), str(int(avail * 1440)))
+        tw.set(qn("w:type"), "dxa")
+        tblPr.append(tw)
         bold_cells = bold_cells or set()
         group_rows = group_rows or set()
         for ri, row in enumerate([header] + rows):

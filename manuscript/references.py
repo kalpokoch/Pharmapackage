@@ -90,4 +90,44 @@ REFERENCES = {
         "J. Baikété, A. Malloum, and J. Conradie, "
         "\u201cpKa prediction for small molecules: an overview of experimental, quantum, and machine learning-based approaches,\u201d "
         "Journal of Computer-Aided Molecular Design, vol. 40, no. 1, 2026, doi: 10.1007/s10822-025-00719-9."),
+    "geot2023": (
+        "B. Kwak, J. Park, T. Kang, J. Jo, B. Lee, and S. Yoon, "
+        "\u201cGeoT: A Geometry-Aware Transformer for Reliable Molecular Property Prediction and Chemically Interpretable Representation Learning,\u201d "
+        "ACS Omega, vol. 8, no. 42, pp. 39759-39769, 2023, doi: 10.1021/acsomega.3c05753."),
+    "hierssl2023": (
+        "X. Zang, X. Zhao, and B. Tang, "
+        "\u201cHierarchical Molecular Graph Self-Supervised Learning for property prediction,\u201d "
+        "Communications Chemistry, vol. 6, no. 1, 2023, doi: 10.1038/s42004-023-00825-5."),
+    "uqexplain2023": (
+        "C. I. Yang, and Y. P. Li, "
+        "\u201cExplainable uncertainty quantifications for deep learning-based molecular property prediction,\u201d "
+        "Journal of Cheminformatics, vol. 15, no. 1, 2023, doi: 10.1186/s13321-023-00682-3."),
+    "curation2024": (
+        "E. Xerxa, M. Vogt, and J. Bajorath, "
+        "\u201cInfluence of Data Curation and Confidence Levels on Compound Predictions Using Machine Learning Models,\u201d "
+        "Journal of Chemical Information and Modeling, vol. 64, no. 24, pp. 9341-9349, 2024, doi: 10.1021/acs.jcim.4c01573."),
+    "pkexposure2024": (
+        "S. Pore, and K. Roy, "
+        "\u201cInsights into pharmacokinetic properties for exposure chemicals: predictive modelling of human plasma fraction unbound ( <i>f</i> <sub>u</sub> ) and hepatocyte intrinsic clearance (Cl <sub>int</sub> ) data using machine learning,\u201d "
+        "Digital Discovery, vol. 3, no. 9, pp. 1852-1877, 2024, doi: 10.1039/d4dd00082j."),
+    "xaignn2024": (
+        "M. Proietti, A. Ragno, B. L. Rosa, R. Ragno, and R. Capobianco, "
+        "\u201cExplainable AI in drug discovery: self-interpretable graph neural network for molecular property prediction using concept whitening,\u201d "
+        "Machine Learning, vol. 113, no. 4, pp. 2013-2044, 2024, doi: 10.1007/s10994-023-06369-y."),
+    "clearanceml2025": (
+        "A. Rawal, J. Ou, H. Zhu, Z. Sauna, and M. A. Tegenge, "
+        "\u201cUtilization of Machine Learning Approaches for Drug Clearance Prediction and Population Pharmacokinetic Covariate Analysis,\u201d "
+        "Clinical and Translational Science, vol. 18, no. 9, 2025, doi: 10.1111/cts.70359."),
+    "intrinsiccl2025": (
+        "V. R. C. Palacharla, R. Nirogi, N. Kumar, and K. Nandakumar, "
+        "\u201cDetermination of Intrinsic Clearance and Fraction Unbound in Human Liver Microsomes and In Vitro-In Vivo Extrapolation of Human Hepatic Clearance for Marketed Central Nervous System Drugs,\u201d "
+        "European Journal of Drug Metabolism and Pharmacokinetics, vol. 50, no. 2, pp. 119-135, 2025, doi: 10.1007/s13318-024-00931-2."),
+    "ddi2026": (
+        "T. Miyake, and H. Tsutsui, "
+        "\u201cQuantitative prediction of human pharmacokinetic drug-drug interactions and drug clearance using humanized liver chimeric mice: a review,\u201d "
+        "Drug Metabolism and Pharmacokinetics, vol. 67, pp. 101517, 2026, doi: 10.1016/j.dmpk.2026.101517."),
+    "fubreview2026": (
+        "J. Stephenson, and K. R. Karnati, "
+        "\u201cRecent trends in machine learning and deep learning-based prediction of G-protein coupled receptor-ligand binding affinities,\u201d "
+        "Frontiers in Bioinformatics, vol. 5, 2026, doi: 10.3389/fbinf.2025.1712577."),
 }
