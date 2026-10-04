@@ -246,6 +246,7 @@ def main():
     doc.add_heading("III. Methodology", level=1)
 
     doc.add_heading("A. Overview", level=2)
+    f_fw = num.fig_label()
     f_gnn = num.fig_label()
     f_mfmn = num.fig_label()
     para(f"The five endpoints are addressed by two model families, chosen because the best representation differs "
@@ -253,7 +254,23 @@ def main():
          f"electronic structure, and are modeled by a message-passing network operating on that graph (Fig. "
          f"{f_gnn}). Clearance, volume of distribution and fraction unbound are whole-organism properties with "
          f"smaller labeled sets, and are modeled by a compact factorized-descriptor network in which named "
-         f"physicochemical descriptor groups are kept in separate pathways (Fig. {f_mfmn}).")
+         f"physicochemical descriptor groups are kept in separate pathways (Fig. {f_mfmn}). Fig. {f_fw} shows how "
+         f"the two families share a common input representation, training protocol and evaluation.")
+    doc.add_picture(str(ROOT / "Diagram" / "Molecular_Property_Prediction_Framework.drawio.png"), width=Inches(6.5))
+    doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    fig_caption(f"Fig. {f_fw}. ", "Overview of the prediction framework. A molecule is converted to a combined "
+                "representation \u2014 a molecular graph, physicochemical descriptors, structural fingerprints, a "
+                "shared descriptor context and semi-empirical quantum-chemical quantities \u2014 from which two "
+                "model families branch. The ionization constants are predicted by a site-aware graph "
+                "message-passing network, with the site readout used for the acidic endpoint and removed for "
+                "the basic one; clearance, volume of distribution and fraction unbound are predicted by the "
+                "factorized-descriptor network, whose variant, gating and auxiliary supervision differ by "
+                "endpoint. Both families follow the same protocol: the official split, ten independent seeds "
+                "averaged into an ensemble prediction, and fold-error or pKa-unit metrics with bootstrap "
+                "intervals. Quantum-chemical features enter the graph models as per-atom charges and bond "
+                "orders and the CL and VDss models as whole-molecule frontier-orbital terms; the Fu model uses "
+                f"deterministic descriptors only. Figs. {f_gnn} and {f_mfmn} detail the two architectures.")
+
     placeholder_figure(f_gnn, 1.6, "[Figure placeholder — GraphMPNN architecture diagram to be inserted]")
     fig_caption(f"Fig. {f_gnn}. ", "Architecture of the edge-gated graph message-passing network used for the two "
                 "pKa endpoints. Placeholder; diagram to be supplied.")
