@@ -265,9 +265,10 @@ def main():
                 "message-passing network, with the site readout used for the acidic endpoint and removed for "
                 "the basic one; clearance, volume of distribution and fraction unbound are predicted by the "
                 "factorized-descriptor network, whose variant, gating and auxiliary supervision differ by "
-                "endpoint. Both families follow the same protocol: the official split, ten independent seeds "
-                "averaged into an ensemble prediction, and fold-error or pKa-unit metrics with bootstrap "
-                "intervals. Quantum-chemical features enter the graph models as per-atom charges and bond "
+                "endpoint. Both families then follow the same protocol: the official split, with ten "
+                "independent seeds averaged into a single ensemble prediction; the metrics used to score "
+                f"those predictions are given in Section {docx_common.ROMAN[3]}-G. Quantum-chemical features "
+                "enter the graph models as per-atom charges and bond "
                 "orders and the CL and VDss models as whole-molecule frontier-orbital terms; the Fu model uses "
                 f"deterministic descriptors only. Figs. {f_gnn} and {f_mfmn} detail the two architectures.")
 
