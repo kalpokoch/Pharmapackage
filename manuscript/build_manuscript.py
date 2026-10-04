@@ -272,9 +272,22 @@ def main():
                 "orders and the CL and VDss models as whole-molecule frontier-orbital terms; the Fu model uses "
                 f"deterministic descriptors only. Figs. {f_gnn} and {f_mfmn} detail the two architectures.")
 
-    placeholder_figure(f_gnn, 1.6, "[Figure placeholder — GraphMPNN architecture diagram to be inserted]")
-    fig_caption(f"Fig. {f_gnn}. ", "Architecture of the edge-gated graph message-passing network used for the two "
-                "pKa endpoints. Placeholder; diagram to be supplied.")
+    doc.add_picture(str(ROOT / "Diagram" / "GMPNN.png"), width=Inches(6.5))
+    doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    fig_caption(f"Fig. {f_gnn}. ", "The GraphMPNN architecture used for the two pKa endpoints. A canonical SMILES "
+                "string is featurized with RDKit and semi-empirical quantum chemistry into a molecular graph with "
+                "36-dimensional atom and 8-dimensional bond features; the ionizable site located by the acidic or "
+                "basic SMARTS matcher is marked as an additional node feature. Atom and bond features are projected "
+                "to 128 dimensions and refined by four edge-gated message-passing layers, in each of which a gate "
+                "computed from the bond features alone modulates each neighbour's transformed state (2), the gated "
+                "messages are summed over bonded neighbours (3), and the result updates the atom state through a "
+                "gated recurrent cell applied residually (4). The final atom states are combined into a 384-"
+                "dimensional graph readout by concatenating the site-atom embedding with masked mean and maximum "
+                "pools and applying layer normalization (5); a two-layer head then predicts the standardized pKa, "
+                "which is returned to pKa units using the training-split statistics. One model is trained per "
+                "endpoint; for the basic endpoint the site term of the readout is omitted, giving a 256-dimensional "
+                "readout.")
+
     placeholder_figure(f_mfmn, 1.6, "[Figure placeholder — MFMN architecture diagram to be inserted]")
     fig_caption(f"Fig. {f_mfmn}. ", "Architecture of the factorized-descriptor network (MFMN) used for CL, VDss "
                 "and Fu, showing the seven mechanistic factor pathways, the shared context, the dynamic gate and "
