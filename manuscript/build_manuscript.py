@@ -67,29 +67,6 @@ def main():
             rn.font.size = Pt(8.5)
         return eq_n[0]
 
-    def placeholder_figure(label, height_in, text):
-        """An empty bordered box standing in for an architecture diagram."""
-        t = doc.add_table(rows=1, cols=1)
-        t.alignment = docx_common.WD_TABLE_ALIGNMENT.CENTER
-        cell = t.cell(0, 0)
-        cell.width = Inches(6.5)
-        docx_common.OxmlElement  # (imported for side-effect parity)
-        H["set_cell_border"](cell, top="single", bottom="single", left="single", right="single")
-        tc = cell._tc.get_or_add_tcPr()
-        shd = OxmlElement("w:shd")
-        shd.set(qn("w:val"), "clear")
-        shd.set(qn("w:fill"), "F2F2F2")
-        tc.append(shd)
-        p = cell.paragraphs[0]
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.paragraph_format.space_before = Pt(height_in * 36)
-        p.paragraph_format.space_after = Pt(height_in * 36)
-        r = p.add_run(text)
-        r.font.size = Pt(9)
-        r.font.color.rgb = RGBColor(0x80, 0x80, 0x80)
-        r.italic = True
-        doc.add_paragraph().paragraph_format.space_after = Pt(2)
-        return label
 
     # ------------------------------------------------------------------ title block
     p = doc.add_paragraph()
@@ -288,10 +265,21 @@ def main():
                 "endpoint; for the basic endpoint the site term of the readout is omitted, giving a 256-dimensional "
                 "readout.")
 
-    placeholder_figure(f_mfmn, 1.6, "[Figure placeholder — MFMN architecture diagram to be inserted]")
-    fig_caption(f"Fig. {f_mfmn}. ", "Architecture of the factorized-descriptor network (MFMN) used for CL, VDss "
-                "and Fu, showing the seven mechanistic factor pathways, the shared context, the dynamic gate and "
-                "the auxiliary heads. Placeholder; diagram to be supplied.")
+    doc.add_picture(str(ROOT / "Diagram" / "MFMN_Architecture.drawio.png"), width=Inches(6.5))
+    doc.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    fig_caption(f"Fig. {f_mfmn}. ", "The MFMN architecture used for CL, VDss and Fu. Top: each molecule yields a "
+                "shared context vector \u2014 199 dimensions for CL and VDss, 1,419 for Fu \u2014 together with "
+                "seven raw descriptor blocks named for the mechanism each represents. Middle: every factor is "
+                "embedded into eight dimensions from the context concatenated with its own block (6); in the "
+                "dynamically gated variant a second branch of the same input produces a per-compound sigmoid gate "
+                "that multiplies the value branch elementwise (7), while the ungated variant used for VDss omits "
+                "it. The seven embeddings concatenate to a 56-dimensional latent. Auxiliary heads, active during "
+                "training for CL and VDss only, predict one measured property per factor (9). Bottom: per target, "
+                "each factor embedding is projected to a rank-8 vector whose pairwise products are summed by the "
+                "factorization identity (8), and the resulting interaction term is concatenated with the factor "
+                "latent to give 64 dimensions, from which a two-layer pathway predicts the standardized target. "
+                "The table gives the configuration of each endpoint; parameter counts are those of Table "
+                f"{docx_common.ROMAN[3]}.")
 
     doc.add_heading("B. Molecular Representation", level=2)
     para("For the pKa models each molecule is represented as a heavy-atom graph. Every atom carries a "
