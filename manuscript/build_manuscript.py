@@ -227,9 +227,11 @@ def main():
           "are per-atom partial charges, the summed and maximum partial charge of each heavy atom's attached "
           "hydrogens, and Wiberg bond orders; for CL and VDss they are whole-molecule frontier-orbital energies, "
           "the HOMO–LUMO gap and the dipole moment. ",
-          ("[NEEDS: the semi-empirical Hamiltonian and implicit-solvation model used to generate these "
-           "descriptors are not recorded in the released package — the generating scripts sit in a parent project. "
-           "State them explicitly here before submission; they must not be inferred.]", "needs")])
+          "All are GFN2-xTB (xTB 6.7.1) single-point calculations with neutral charge and singlet multiplicity "
+          "assumed for every compound and no geometry optimization at the xTB level, run on the "
+          "lowest-energy MMFF94-optimized ETKDGv3 conformer. The pKa features are computed on the largest "
+          "fragment with the ALPB implicit-solvent model for water, whereas the CL and VDss descriptors are "
+          "computed in the gas phase."])
 
     # ------------------------------------------------------------------ III. Methodology
     doc.add_heading("III. Methodology", level=1)
