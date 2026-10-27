@@ -369,6 +369,7 @@ def emit(ctx):
 
     PKA_MET = ["R2", "MAE", "RMSE", "within_1_pKa_unit"]
     full, nx, ne = "GraphMPNN (full)", "full, w/o xTB features", "full, w/o edge gating"
+    nf = "final, w/o xTB features"
     para(f"On pKa (acidic), none of the three ablations changes performance measurably: every ensemble metric is within "
          f"{f(abl[abl.target=='pKa_Acidic'].diff_final_minus_variant.abs().max(), 3)} of the final model "
          f"(R² {f(m('pKa_Acidic','R2').ensemble, 4)} for the final model vs. "
@@ -389,7 +390,11 @@ def emit(ctx):
          f"final model, removing the xTB-derived features from the full GraphMPNN degrades every metric with all "
          f"paired-difference CIs excluding zero (RMSE {f(av('pKa_Basic',nx,'RMSE').ensemble)} vs. "
          f"{f(m('pKa_Basic','RMSE').ensemble)}), and the full model without edge gating is worse on R² and RMSE with CIs "
-         f"excluding zero (RMSE {f(av('pKa_Basic',ne,'RMSE').ensemble)}).")
+         f"excluding zero (RMSE {f(av('pKa_Basic',ne,'RMSE').ensemble)}). Removing the xTB-derived features from the final "
+         f"model itself (no site readout, no xTB) gives the same result: R² {f(av('pKa_Basic',nf,'R2').ensemble)}, MAE "
+         f"{f(av('pKa_Basic',nf,'MAE').ensemble)} and RMSE {f(av('pKa_Basic',nf,'RMSE').ensemble)}, all worse than the final "
+         f"model with every paired-difference CI excluding zero (MAE difference CI "
+         f"[{f(av('pKa_Basic',nf,'MAE').diff_ci_lo, 4)}, {f(av('pKa_Basic',nf,'MAE').diff_ci_hi, 4)}]).")
 
     fu_w = "MFMN-DynGate, no loss weight"
     para(f"On Fu, removing the 1.25× low-fu loss weight leaves performance essentially unchanged: GMFE "
@@ -401,7 +406,8 @@ def emit(ctx):
     caption(f"Table {T7}\n", "Ablation of GraphMPNN on pKa (10 seeds, official test splits)")
     rows, bolds = [], set()
     ORDER = {"pKa_Acidic": ["w/o xTB features", "w/o edge gating", "w/o site readout", "final"],
-             "pKa_Basic": ["full, w/o xTB features", "full, w/o edge gating", "GraphMPNN (full)", "final"]}
+             "pKa_Basic": ["full, w/o xTB features", "full, w/o edge gating", "GraphMPNN (full)",
+                           "final, w/o xTB features", "final"]}
     for t in ["pKa_Acidic", "pKa_Basic"]:
         order = ORDER[t]
         vals = {var: {x: (m(t, x).ensemble if var == "final" else av(t, var, x).ensemble) for x in PKA_MET}
@@ -427,7 +433,8 @@ def emit(ctx):
                  "endpoint and metric. †: paired-bootstrap 95% CI of the difference (final − variant) excludes zero in "
                  "favor of the final model; no mark: CI includes zero; no variant was resolved as better than the final "
                  "model. pKa (acidic): final = full GraphMPNN. pKa (basic): final = GraphMPNN without the ionizable-site "
-                 f"readout; 'full' rows are the complete GraphMPNN and its ablations. Final-model rows are those of Table {T1}."])
+                 f"readout; 'full' rows are the complete GraphMPNN and its ablations; 'final, w/o xTB features' is the final model "
+                 f"with the xTB inputs zeroed. Final-model rows are those of Table {T1}."])
 
     # ---------------- F. downstream exposure ----------------
     doc.add_heading("F. Propagation to Predicted Exposure", level=2)
