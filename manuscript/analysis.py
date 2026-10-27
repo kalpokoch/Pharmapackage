@@ -28,7 +28,7 @@ ABLATION = {
                    ("no_site_readout", "w/o site readout")],
     # pKa_Basic final = GraphMPNN without the site readout; the full GraphMPNN and its ablations are compared against it
     "pKa_Basic": [("full_graphmpnn", "GraphMPNN (full)"), ("no_xtb", "full, w/o xTB features"),
-                  ("no_edge_gating", "full, w/o edge gating")],
+                  ("no_edge_gating", "full, w/o edge gating"), ("no_site_no_xtb", "final, w/o xTB features")],
 }
 
 def _extra_fold_metrics(abs_err_log10, names):
