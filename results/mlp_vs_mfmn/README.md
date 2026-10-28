@@ -44,7 +44,7 @@ Paired-bootstrap CIs (10,000 resamples of test compounds, MFMN final minus varia
 - **CL.** MFMN final (2.018) is indistinguishable from the plain MLPs (2.018-2.031). It is better than the MLP with auxiliary
   heads (GMFE and MAE resolved), i.e. the auxiliary loss does not transfer to a plain MLP on CL, but that is not evidence
   for the factor design over a plain MLP.
-- **Untuned MLP.** On VDss the untuned 2-layer MLP (GMFE 1.797) is close to MFMN, but MFMN's R² and RMSE are resolved as better (R² +0.029, CI [0.005, 0.053]); GMFE, MAE and within-2-fold are not. On CL the untuned 2-layer MLP is clearly worse (GMFE 2.098 vs 2.018, CI of the difference [-0.162, -0.006]; MAE also resolved), while the untuned 3-layer MLP (2.040) is not. Tuning (or MFMN's regularisation: dropout 0.2-0.3) closes the gap, so part of MFMN's advantage over a naively configured MLP is regularisation.
+- **Untuned MLP.** On VDss the untuned 2-layer MLP (GMFE 1.797) is close to MFMN, but MFMN's R² and RMSE are resolved as better (R² +0.029, CI [0.005, 0.053]); GMFE, MAE and within-2-fold are not. On CL the untuned 2-layer MLP is clearly worse (GMFE 2.098 vs 2.018, CI of the difference [-0.162, -0.006]; MAE also resolved), while the untuned 3-layer MLP (2.040) is not. The untuned VDss 3-layer MLP shows the same R² / RMSE gap as the 2-layer one; the untuned CL 3-layer MLP shows no resolved gap. Tuning closes the gaps (see the tuned rows); the untuned MLPs have no dropout, so regularisation is a plausible but untested reason.
 - So these experiments do **not** establish that the seven-factor design is better than a conventional MLP on these
   descriptors; they are also not evidence that it is worse (no MLP is resolved as better than MFMN final).
 
