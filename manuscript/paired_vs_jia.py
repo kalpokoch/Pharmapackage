@@ -98,7 +98,7 @@ def make_figure(per, summary):
         ax.scatter(x[~better], y[~better], s=7, color=figures.ORANGE, alpha=0.75, linewidths=0, zorder=3)
         ax.set_xlim(0, hi); ax.set_ylim(0, hi)
         ax.set_title(f"{figures.TITLE[ep]}\n{int(better.sum())}/{len(d)} closer", color=figures.INK, fontsize=7)
-        ax.set_xlabel("|error| Jia et al.", fontsize=6.5)
+        ax.set_xlabel("error", fontsize=6.5)
         figures.grid(ax)
     axes[0].set_ylabel("|error| this work", fontsize=6.5)
     fig.text(0.5, -0.06, "Per-compound absolute error on the 106 compounds for which the benchmark publishes "
