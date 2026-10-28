@@ -268,6 +268,8 @@ if __name__ == "__main__":
     base = dict(lr=CFG[target]["lr"], wd=CFG[target]["wd"], dropout=0.2, aux_w=CFG[target]["aux_w"])
     if phase == "matched":
         run_variants(target, lambda v: dict(base) if VARIANTS[v][1] else {**base, "aux_w": 0.0}, "matched")
+    elif phase == "untuned":  # framework defaults: AdamW lr 1e-3, wd 1e-2, no dropout; plain MLPs only
+        run_variants(target, lambda v: None if VARIANTS[v][1] else dict(lr=1e-3, wd=1e-2, dropout=0.0, aux_w=0.0), "untuned")
     elif phase == "tuned":
         best = {v: tune(target, v) for v in ("mlp_2L", "mlp_2L_aux")}
         json.dump(best, open(OUT / target / "tuned_hparams.json", "w"), indent=1)
